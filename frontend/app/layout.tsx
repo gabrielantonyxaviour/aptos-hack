@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
+import { WalletProvider } from "@/components/providers/wallet-provider";
+import { WrongNetworkAlert } from "@/components/ui/custom/wrong-network-alert";
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -34,7 +37,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <WalletProvider>
+            <Toaster />
+            <WrongNetworkAlert />
+            {children}
+          </WalletProvider>
         </ThemeProvider>
       </body>
     </html>
