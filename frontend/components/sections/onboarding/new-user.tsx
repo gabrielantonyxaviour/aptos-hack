@@ -209,8 +209,9 @@ export default function NewUser() {
         <div className="flex flex-col space-y-2">
           <p className="font-semibold text-sm">Your Niche</p>
           <div className="">
-            {availableCatgegories.map((category) => (
+            {availableCatgegories.map((category, idx) => (
               <Badge
+                key={idx}
                 className={`m-1 cursor-pointer ${
                   niches.includes(category)
                     ? "bg-primary"
@@ -239,12 +240,13 @@ export default function NewUser() {
         <div className="flex flex-col space-y-2">
           <p className="font-semibold text-sm">Preferences</p>
           <div className="">
-            {availableCatgegories.map((category) => (
+            {availableCatgegories.map((category, idx) => (
               <Badge
+                key={idx}
                 className={`m-1 cursor-pointer ${
                   preferences.includes(category)
                     ? "bg-primary"
-                    : `bg-secondary ${
+                    : `, bg-secondary ${
                         preferences.length >= 5
                           ? "text-muted-foreground hover:bg-secondary cursor-not-allowed"
                           : "text-white"
