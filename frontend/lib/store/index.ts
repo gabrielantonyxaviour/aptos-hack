@@ -1,4 +1,4 @@
-import { create, createStore } from "zustand";
+import { createStore } from "zustand";
 import { createProfileSlice, ProfileSlice } from "./profileSlice";
 export type EnvironmentStore = ProfileSlice;
 
