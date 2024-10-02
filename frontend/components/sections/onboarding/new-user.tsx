@@ -23,6 +23,35 @@ export default function NewUser() {
   const { account, disconnect, wallet } = useWallet();
   const [image, setImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const [name, setName] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
+  const [bio, setBio] = useState<string>("");
+  const [niches, setNiches] = useState<string[]>([]);
+  const [preferences, setPreferences] = useState<string[]>([]);
+  const availableCatgegories = [
+    "Technology",
+    "Health & Fitness",
+    "Travel",
+    "Fashion",
+    "Music",
+    "Food & Drink",
+    "Gaming",
+    "Movies & TV Shows",
+    "Business & Finance",
+    "Sports",
+    "Art & Design",
+    "Photography",
+    "Books & Literature",
+    "Science",
+    "Personal Development",
+    "Politics",
+    "Education",
+    "Lifestyle",
+    "Entrepreneurship",
+    "Environment",
+  ];
+
   const { toast } = useToast();
   const copyAddress = useCallback(async () => {
     if (!account?.address) return;
@@ -140,21 +169,39 @@ export default function NewUser() {
         </div>
         <div className="flex flex-col space-y-2">
           <p className="font-semibold text-sm">User Name</p>
-          <Input className="ml-1"></Input>
+          <Input
+            className="ml-1"
+            value={username}
+            onChange={(e) => {
+              setUsername(e.target.value);
+            }}
+          ></Input>
           <p className="text-xs text-muted-foreground">
             A unique username or id of your profile.
           </p>
         </div>
         <div className="flex flex-col space-y-2">
           <p className="font-semibold text-sm">Display Name</p>
-          <Input className="ml-1"></Input>
+          <Input
+            className="ml-1"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+            }}
+          ></Input>
           <p className="text-xs text-muted-foreground">
             The name that will be displayed on your profile.
           </p>
         </div>
         <div className="flex flex-col space-y-2">
           <p className="font-semibold text-sm">Bio</p>
-          <Textarea className="ml-1" />
+          <Textarea
+            className="ml-1"
+            value={bio}
+            onChange={(e) => {
+              setBio(e.target.value);
+            }}
+          />
           <p className="text-xs text-muted-foreground">
             Tell something about yourself and what you do.
           </p>
@@ -162,10 +209,28 @@ export default function NewUser() {
         <div className="flex flex-col space-y-2">
           <p className="font-semibold text-sm">Your Niche</p>
           <div className="">
-            <Badge className={`m-1 cursor-pointer ${""}`}>Entertainment</Badge>
-            <Badge className={`m-1 cursor-pointer ${""}`}>Music</Badge>
-            <Badge className={`m-1 cursor-pointer ${""}`}>Food Vlogs</Badge>
-            <Badge className={`m-1 cursor-pointer ${""}`}>Cooking</Badge>
+            {availableCatgegories.map((category) => (
+              <Badge
+                className={`m-1 cursor-pointer ${
+                  niches.includes(category)
+                    ? "bg-primary"
+                    : `bg-secondary ${
+                        niches.length >= 5
+                          ? "text-muted-foreground hover:bg-secondary cursor-not-allowed"
+                          : "text-white"
+                      }`
+                }`}
+                onClick={() => {
+                  if (niches.includes(category)) {
+                    setNiches(niches.filter((n) => n !== category));
+                  } else {
+                    setNiches([...niches, category]);
+                  }
+                }}
+              >
+                {category}
+              </Badge>
+            ))}
           </div>
           <p className="text-xs text-muted-foreground">
             Choose your content niche to reach your target audience.
@@ -174,16 +239,42 @@ export default function NewUser() {
         <div className="flex flex-col space-y-2">
           <p className="font-semibold text-sm">Preferences</p>
           <div className="">
-            <Badge className={`m-1 cursor-pointer ${""}`}>Entertainment</Badge>
-            <Badge className={`m-1 cursor-pointer ${""}`}>Music</Badge>
-            <Badge className={`m-1 cursor-pointer ${""}`}>Food Vlogs</Badge>
-            <Badge className={`m-1 cursor-pointer ${""}`}>Cooking</Badge>
+            {availableCatgegories.map((category) => (
+              <Badge
+                className={`m-1 cursor-pointer ${
+                  preferences.includes(category)
+                    ? "bg-primary"
+                    : `bg-secondary ${
+                        preferences.length >= 5
+                          ? "text-muted-foreground hover:bg-secondary cursor-not-allowed"
+                          : "text-white"
+                      }`
+                }`}
+                onClick={() => {
+                  if (preferences.includes(category)) {
+                    setPreferences(preferences.filter((n) => n !== category));
+                  } else {
+                    setPreferences([...preferences, category]);
+                  }
+                }}
+              >
+                {category}
+              </Badge>
+            ))}
           </div>
           <p className="text-xs text-muted-foreground">
             Choose the type of content you want to see on your feed.
           </p>
         </div>
-        <Button variant={"outline"} className="font-semibold">
+        <Button
+          variant={"outline"}
+          className="font-semibold"
+          onClick={() => {
+            // TODO: Store image to ipfs
+            // TODO: Send a transaction to create a new user
+            // TODO: Update zustand state
+          }}
+        >
           Get Started
         </Button>
       </div>

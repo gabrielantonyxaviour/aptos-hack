@@ -7,7 +7,8 @@ interface ProfileState {
   image: string;
   following: number;
   followers: number;
-  tags: string[];
+  niches: string[];
+  preferences: string[];
 }
 
 interface ProfileActions {
@@ -16,11 +17,6 @@ interface ProfileActions {
 
 export type ProfileSlice = ProfileState & ProfileActions;
 
-type SetFunction = (
-  partial: ProfileState | ((state: ProfileState) => ProfileState),
-  replace?: boolean
-) => void;
-
 export const initalProfileState: ProfileState = {
   username: "",
   name: "",
@@ -28,7 +24,8 @@ export const initalProfileState: ProfileState = {
   image: "",
   following: 0,
   followers: 0,
-  tags: [],
+  niches: [],
+  preferences: [],
 };
 
 export const createProfileSlice: StateCreator<
