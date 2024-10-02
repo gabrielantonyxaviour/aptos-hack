@@ -6,17 +6,14 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 import {
-  APTOS_CONNECT_ACCOUNT_URL,
   AnyAptosWallet,
-  AptosPrivacyPolicy,
   WalletItem,
   getAptosConnectWallets,
-  isAptosConnectWallet,
   isInstallRequired,
   partitionWallets,
-  truncateAddress,
   useWallet,
 } from "@aptos-labs/wallet-adapter-react";
+import NewUser from "./new-user";
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
