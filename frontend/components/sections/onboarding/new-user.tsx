@@ -11,13 +11,18 @@ import {
   truncateAddress,
   useWallet,
 } from "@aptos-labs/wallet-adapter-react";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, LogOut, User } from "lucide-react";
+import { Copy, LogOut, Trash, User } from "lucide-react";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 export default function NewUser() {
   const { account, disconnect, wallet } = useWallet();
+  const [image, setImage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const copyAddress = useCallback(async () => {
     if (!account?.address) return;
@@ -36,60 +41,153 @@ export default function NewUser() {
     }
   }, [account?.address, toast]);
   return (
-    <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px] lg:w-[450px] xl:w-[550px]">
-      <div className="flex justify-between items-center">
-        <div className="flex space-x-3 items-end justify-center">
-          <Image src={"/logo.png"} width={40} height={40} alt="Logo" />
-          <p className="font-semibold text-lg mb-1">SocioBerries</p>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant={"secondary"} className="font-semibold">
-              {account?.ansName ||
-                truncateAddress(account?.address) ||
-                "Unknown"}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={copyAddress} className="gap-2">
-              <Copy className="h-4 w-4" /> Copy address
-            </DropdownMenuItem>
-            {wallet && isAptosConnectWallet(wallet) && (
-              <DropdownMenuItem asChild>
-                <a
-                  href={APTOS_CONNECT_ACCOUNT_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex gap-2"
-                >
-                  <User className="h-4 w-4" /> Account
-                </a>
+    <ScrollArea className="h-[80vh]">
+      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px] lg:w-[450px] xl:w-[550px]">
+        <div className="flex justify-between items-center">
+          <div className="flex space-x-3 items-end justify-center">
+            <Image src={"/logo.png"} width={40} height={40} alt="Logo" />
+            <p className="font-semibold text-lg mb-1">SocioBerries</p>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant={"secondary"} className="font-semibold">
+                {account?.ansName ||
+                  truncateAddress(account?.address) ||
+                  "Unknown"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={copyAddress} className="gap-2">
+                <Copy className="h-4 w-4" /> Copy address
               </DropdownMenuItem>
-            )}
-            <DropdownMenuItem onSelect={disconnect} className="gap-2">
-              <LogOut className="h-4 w-4" /> Disconnect
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              {wallet && isAptosConnectWallet(wallet) && (
+                <DropdownMenuItem asChild>
+                  <a
+                    href={APTOS_CONNECT_ACCOUNT_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex gap-2"
+                  >
+                    <User className="h-4 w-4" /> Account
+                  </a>
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onSelect={disconnect} className="gap-2">
+                <LogOut className="h-4 w-4" /> Disconnect
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <p className="text-lg font-medium text-center">Create Account</p>
+        <div className="flex justify-center">
+          {image != null ? (
+            <div className="relative group">
+              <Image
+                src={image}
+                alt="uploaded"
+                width={150}
+                height={150}
+                className="cursor-pointer rounded-lg transition-opacity duration-300 ease-in-out group-hover:opacity-50"
+                onClick={() => setImage(null)}
+              />
+              <div
+                className="cursor-pointer absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2  rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out"
+                onClick={() => setImage(null)}
+              >
+                <Trash className="w-8 h-8 " />
+              </div>
+            </div>
+          ) : (
+            <label
+              htmlFor="imageUpload"
+              className="flex justify-center items-center w-[150px] h-[150px] border border-dashed border-secondary cursor-pointer"
+            >
+              <input
+                id="imageUpload"
+                type="file"
+                accept="image/*"
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  const file = event.target.files?.[0]; // Get the first selected file
+
+                  if (file) {
+                    if (file.size > 2 * 1024 * 1024) {
+                      // Restrict size to 2MB
+                      setError("File size exceeds 2MB");
+                      toast({
+                        variant: "destructive",
+                        title: "Error",
+                        description: "File size exceeds 2MB",
+                      });
+                      setImage(null);
+                      return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setImage(reader.result as string); // Convert the file to a base64 string
+                      setError(null);
+                    };
+                    reader.readAsDataURL(file); // Read the file as a data URL
+                  }
+                }}
+                className="hidden"
+              />
+              <p className="text-xs text-muted-foreground text-center">
+                Click here to <br /> upload
+              </p>
+            </label>
+          )}
+        </div>
+        <div className="flex flex-col space-y-2">
+          <p className="font-semibold text-sm">User Name</p>
+          <Input className="ml-1"></Input>
+          <p className="text-xs text-muted-foreground">
+            A unique username or id of your profile.
+          </p>
+        </div>
+        <div className="flex flex-col space-y-2">
+          <p className="font-semibold text-sm">Display Name</p>
+          <Input className="ml-1"></Input>
+          <p className="text-xs text-muted-foreground">
+            The name that will be displayed on your profile.
+          </p>
+        </div>
+        <div className="flex flex-col space-y-2">
+          <p className="font-semibold text-sm">Bio</p>
+          <Textarea className="ml-1" />
+          <p className="text-xs text-muted-foreground">
+            Tell something about yourself and what you do.
+          </p>
+        </div>
+        <div className="flex flex-col space-y-2">
+          <p className="font-semibold text-sm">Your Niche</p>
+          <div className="">
+            <Badge className={`m-1 cursor-pointer ${""}`}>Entertainment</Badge>
+            <Badge className={`m-1 cursor-pointer ${""}`}>Music</Badge>
+            <Badge className={`m-1 cursor-pointer ${""}`}>Food Vlogs</Badge>
+            <Badge className={`m-1 cursor-pointer ${""}`}>Cooking</Badge>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Choose your content niche to reach your target audience.
+          </p>
+        </div>
+        <div className="flex flex-col space-y-2">
+          <p className="font-semibold text-sm">Preferences</p>
+          <div className="">
+            <Badge className={`m-1 cursor-pointer ${""}`}>Entertainment</Badge>
+            <Badge className={`m-1 cursor-pointer ${""}`}>Music</Badge>
+            <Badge className={`m-1 cursor-pointer ${""}`}>Food Vlogs</Badge>
+            <Badge className={`m-1 cursor-pointer ${""}`}>Cooking</Badge>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Choose the type of content you want to see on your feed.
+          </p>
+        </div>
+        <Button variant={"outline"} className="font-semibold">
+          Get Started
+        </Button>
       </div>
-      <p className="text-lg font-medium text-center">Create Account</p>
-      <div className="flex flex-col space-y-2">
-        <p className="font-semibold text-sm">User Name</p>
-        <Input className="ml-1"></Input>
-        <p className="text-xs text-muted-foreground">
-          A unique username or id of your profile.
-        </p>
-      </div>
-      <div className="flex flex-col space-y-2">
-        <p className="font-semibold text-sm">Display Name</p>
-        <Input className="ml-1"></Input>
-        <p className="text-xs text-muted-foreground">
-          The name that will be displayed on your profile.
-        </p>
-      </div>
-      <p>Bio</p>
-      <p>Your Niche</p>
-      <p>Preferences</p>
-    </div>
+      <ScrollBar orientation="vertical" />
+    </ScrollArea>
   );
 }
