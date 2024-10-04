@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description: "Authentication forms built using the components.",
 };
 
-export default function AuthenticationPage() {
+export default function OnboardingPage() {
   const { connected } = useWallet();
   return (
     <>

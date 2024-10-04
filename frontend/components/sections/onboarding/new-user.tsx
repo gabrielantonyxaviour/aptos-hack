@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { useRouter } from "next/navigation";
 export default function NewUser() {
   const { account, disconnect, wallet } = useWallet();
   const [image, setImage] = useState<string | null>(null);
@@ -29,6 +30,8 @@ export default function NewUser() {
   const [bio, setBio] = useState<string>("");
   const [niches, setNiches] = useState<string[]>([]);
   const [preferences, setPreferences] = useState<string[]>([]);
+
+  const router = useRouter();
   const availableCatgegories = [
     "Technology",
     "Health & Fitness",
@@ -275,6 +278,7 @@ export default function NewUser() {
             // TODO: Store image to ipfs
             // TODO: Send a transaction to create a new user
             // TODO: Update zustand state
+            router.push("/home");
           }}
         >
           Get Started
