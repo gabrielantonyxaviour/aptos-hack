@@ -53,16 +53,16 @@ export default function SideBar() {
   ];
 
   return (
-    <div className="h-full border-r-[1px] border-r-secondary py-4 px-8">
+    <div className="h-full border-r-[1px] border-r-secondary py-4 px-8 flex flex-col">
       <div className="flex space-x-4 items-end mb-12">
         <Image src={"/logo.png"} width={40} height={40} alt="Logo" />
-        <p className="font-semibold text-xl mb-[1px]">SocioBerries</p>
+        <p className="font-semibold text-lg mb-[1px]">SocioBerries</p>
       </div>
-      <div className="flex flex-col space-y-4">
+      <div className="flex-1 flex flex-col space-y-4">
         {navs.map((nav) => (
           <div
             key={nav.id}
-            className={`flex items-center gap-4 p-2 cursor-pointer hover:translate-x-2 transition ease-out delay-150  ${
+            className={`flex items-center gap-4 p-2 text-sm cursor-pointer hover:translate-x-2 transition ease-out delay-150  ${
               pathname === nav.href
                 ? "text-primary font-semibold "
                 : "text-white font-medium"
@@ -72,13 +72,25 @@ export default function SideBar() {
             }}
           >
             {pathname === nav.href ? (
-              <nav.icon size={24} className="text-primary" />
+              <nav.icon size={18} className="text-primary font-bold" />
             ) : (
-              <nav.icon size={24} className="text-white" />
+              <nav.icon size={18} className="text-white font-bold" />
             )}
             <p className="">{nav.name}</p>
           </div>
         ))}
+        <div className=" flex-1 flex flex-col justify-end">
+          <div className="flex items-center  space-x-3">
+            <Image
+              src={"/avatar.jpeg"}
+              width={30}
+              height={30}
+              alt="Profile"
+              className="rounded-full"
+            />
+            <p className="text-white text-sm font-semibold">gabrielaxy.aptos</p>
+          </div>
+        </div>
       </div>
     </div>
   );
