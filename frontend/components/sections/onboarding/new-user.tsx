@@ -1,27 +1,16 @@
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import {
-  APTOS_CONNECT_ACCOUNT_URL,
-  isAptosConnectWallet,
-  truncateAddress,
-  useWallet,
-} from "@aptos-labs/wallet-adapter-react";
-import { useCallback, useState } from "react";
+
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, LogOut, Trash, User } from "lucide-react";
+import { Trash } from "lucide-react";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useRouter } from "next/navigation";
+import WalletInfo from "@/components/ui/custom/wallet-info";
 export default function NewUser() {
-  const { account, disconnect, wallet } = useWallet();
   const [image, setImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,6 +19,7 @@ export default function NewUser() {
   const [bio, setBio] = useState<string>("");
   const [niches, setNiches] = useState<string[]>([]);
   const [preferences, setPreferences] = useState<string[]>([]);
+  const { toast } = useToast();
 
   const router = useRouter();
   const availableCatgegories = [
@@ -55,23 +45,6 @@ export default function NewUser() {
     "Environment",
   ];
 
-  const { toast } = useToast();
-  const copyAddress = useCallback(async () => {
-    if (!account?.address) return;
-    try {
-      await navigator.clipboard.writeText(account.address);
-      toast({
-        title: "Success",
-        description: "Copied wallet address to clipboard.",
-      });
-    } catch {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to copy wallet address.",
-      });
-    }
-  }, [account?.address, toast]);
   return (
     <ScrollArea className="h-[80vh]">
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px] lg:w-[450px] xl:w-[550px]">
@@ -80,35 +53,7 @@ export default function NewUser() {
             <Image src={"/logo.png"} width={40} height={40} alt="Logo" />
             <p className="font-semibold text-lg mb-1">SocioBerries</p>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant={"secondary"} className="font-semibold">
-                {account?.ansName ||
-                  truncateAddress(account?.address) ||
-                  "Unknown"}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={copyAddress} className="gap-2">
-                <Copy className="h-4 w-4" /> Copy address
-              </DropdownMenuItem>
-              {wallet && isAptosConnectWallet(wallet) && (
-                <DropdownMenuItem asChild>
-                  <a
-                    href={APTOS_CONNECT_ACCOUNT_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex gap-2"
-                  >
-                    <User className="h-4 w-4" /> Account
-                  </a>
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem onSelect={disconnect} className="gap-2">
-                <LogOut className="h-4 w-4" /> Disconnect
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <WalletInfo />
         </div>
         <p className="text-lg font-medium text-center">Create Account</p>
         <div className="flex justify-center">

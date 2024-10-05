@@ -1,7 +1,15 @@
 "use client";
 
 import { createEnvironmentStore, type EnvironmentStore } from "@/lib/store";
-import { type ReactNode, createContext, useRef, useContext } from "react";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  type ReactNode,
+  createContext,
+  useRef,
+  useContext,
+  useEffect,
+} from "react";
 import { useStore } from "zustand";
 
 export type EnvironmentStoreApi = ReturnType<typeof createEnvironmentStore>;
@@ -21,6 +29,14 @@ export const EnvironmentStoreProvider = ({
   if (!storeRef.current) {
     storeRef.current = createEnvironmentStore();
   }
+  const { connected } = useWallet();
+  const router = useRouter();
+  const pathName = usePathname();
+  useEffect(() => {
+    if (!connected && pathName != "/") {
+      router.push("/");
+    }
+  }, [connected, pathName]);
 
   return (
     <EnvironmentStoreContext.Provider value={storeRef.current}>

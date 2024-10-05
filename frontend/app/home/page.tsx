@@ -2,6 +2,7 @@
 
 import SideBar from "@/components/sections/side-nav";
 import Post from "@/components/ui/custom/post";
+import Suggested from "@/components/ui/custom/suggested";
 import { ScrollBar, ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -36,8 +37,8 @@ export default function HomePage() {
   return (
     <div className="flex h-screen">
       <SideBar />
-      <div className="flex-1 flex justify-center space-x-4">
-        <div className="pt-7 px-7 w-[40%]">
+      <div className="pt-7 px-7 flex-1 flex justify-center space-x-12">
+        <div className=" w-[40%]">
           <Tabs defaultValue="suggested">
             <div className=" flex justify-between w-full">
               <p className="font-semibold text-lg">Your Feed</p>
@@ -62,7 +63,7 @@ export default function HomePage() {
             </div>
           </Tabs>
         </div>
-        <div className="w-[40%]"></div>
+        <Suggested />
       </div>
     </div>
   );

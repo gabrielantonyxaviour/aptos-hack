@@ -62,7 +62,7 @@ export default function SideBar() {
         {navs.map((nav) => (
           <div
             key={nav.id}
-            className={`flex items-center gap-4 p-2 text-sm cursor-pointer hover:translate-x-2 transition ease-out delay-150  ${
+            className={`flex items-center gap-4 p-2 cursor-pointer hover:translate-x-1 hover:scale-110 transition ease-out delay-100  ${
               pathname === nav.href
                 ? "text-primary font-semibold "
                 : "text-white font-medium"
