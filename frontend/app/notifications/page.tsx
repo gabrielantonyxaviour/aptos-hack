@@ -52,8 +52,9 @@ export default function NotificationsPage() {
             <WalletInfo />
           </div>
           <Separator className="my-4" />
-          {notifications.map((not) => (
+          {notifications.map((not, idx) => (
             <Notification
+              key={idx}
               type={not.type}
               user={not.user.name}
               image={not.ref.image}

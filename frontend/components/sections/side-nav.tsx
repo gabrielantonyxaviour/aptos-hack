@@ -136,8 +136,9 @@ export default function SideBar() {
           <Separator />
           <div className="p-4">
             <p className=" font-semibold text-sm py-4">Recent</p>
-            {profiles.map((p) => (
+            {profiles.map((p, idx) => (
               <SuggestedProfile
+                key={idx}
                 name={p.name}
                 username={p.username}
                 image={p.image}

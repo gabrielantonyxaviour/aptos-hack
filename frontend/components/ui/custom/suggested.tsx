@@ -40,8 +40,9 @@ export default function Suggested() {
       <p className="text-muted-foreground font-semibold my-2">
         Sugested for you
       </p>
-      {profiles.map((p) => (
+      {profiles.map((p, idx) => (
         <SuggestedProfile
+          key={idx}
           name={p.name}
           username={p.username}
           image={p.image}
