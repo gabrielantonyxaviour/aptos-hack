@@ -33,37 +33,37 @@ export default function SideBar() {
     {
       id: 1,
       name: "Home",
-      icon: Home,
+      icon: "🏠",
       href: "/home",
     },
     {
       id: 2,
       name: "Search",
-      icon: Search,
+      icon: "🔍",
       href: "/search",
     },
     {
       id: 3,
       name: "Create",
-      icon: Plus,
+      icon: "🖼️",
       href: "/create",
     },
     {
       id: 4,
       name: "Notifications",
-      icon: Bell,
+      icon: "🔔",
       href: "/notifications",
     },
     {
       id: 5,
-      name: "Dashboard",
-      icon: LineChart,
-      href: "/dashboard",
+      name: "Collabs",
+      icon: "🤝",
+      href: "/collab",
     },
     {
       id: 6,
       name: "Profile",
-      icon: User,
+      icon: "😀",
       href: "/profile",
     },
   ];
@@ -102,11 +102,7 @@ export default function SideBar() {
                 else setShowSearch(true);
               }}
             >
-              {pathname === nav.href ? (
-                <nav.icon size={18} className="text-primary font-bold" />
-              ) : (
-                <nav.icon size={18} className="text-white font-bold" />
-              )}
+              <p className="text-white font-bold text-lg">{nav.icon}</p>
               <p className="">{nav.name}</p>
             </div>
           ))}
