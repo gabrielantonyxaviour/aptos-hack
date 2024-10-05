@@ -1,14 +1,17 @@
 import Image from "next/image";
 import { Button } from "../button";
+import { X } from "lucide-react";
 
 export default function SuggestedProfile({
   name,
   username,
   image,
+  action,
 }: {
   name: string;
   username: string;
   image: string;
+  action: number;
 }) {
   return (
     <div className="flex justify-between ">
@@ -30,14 +33,20 @@ export default function SuggestedProfile({
           <p className="text-sm text-muted-foreground">{name}</p>
         </div>
       </div>
-      <Button
-        className="bg-transparent text-white hover:bg-transparent hover:font-semibold  hover:-translate-y-1 hover:scale-110 transition ease-in-out duration-150"
-        onClick={() => {
-          // TODO: Follow user
-        }}
-      >
-        Follow
-      </Button>
+      {action == 1 ? (
+        <Button
+          className="bg-transparent text-white hover:bg-transparent hover:font-semibold  hover:-translate-y-1 hover:scale-110 transition ease-in-out duration-150"
+          onClick={() => {
+            // TODO: Follow user
+          }}
+        >
+          Follow
+        </Button>
+      ) : (
+        <Button variant={"ghost"}>
+          <X className="w-4 h-4" />
+        </Button>
+      )}
     </div>
   );
 }

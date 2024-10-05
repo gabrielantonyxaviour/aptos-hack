@@ -41,7 +41,12 @@ export default function Suggested() {
         Sugested for you
       </p>
       {profiles.map((p) => (
-        <SuggestedProfile name={p.name} username={p.username} image={p.image} />
+        <SuggestedProfile
+          name={p.name}
+          username={p.username}
+          image={p.image}
+          action={1}
+        />
       ))}
     </div>
   );
