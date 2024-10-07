@@ -1,10 +1,10 @@
 [package]
-name = "BerriesMinting"
+name = "jobicoin"
 version = "1.0.0"
 authors = []
 
 [addresses]
-berries_minting = "_"
+FACoin="_"
 
 [dev-addresses]
 
