@@ -170,7 +170,7 @@ export default function CreatePage() {
                   ))
                 ) : (
                   <p className="text-muted-foreground">
-                    You dont't have any promotions yet.
+                    You dont&apos;t have any promotions yet.
                   </p>
                 )}
               </div>

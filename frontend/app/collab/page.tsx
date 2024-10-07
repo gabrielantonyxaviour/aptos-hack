@@ -299,7 +299,7 @@ export default function CollabPage() {
                         value={minBerries}
                         className="bg-accent text-md"
                         onChange={(e) => {
-                          let value = parseFloat(
+                          const value = parseFloat(
                             e.target.value.replace(/,/g, "")
                           );
                           if (isNaN(value) || value < 0) {
@@ -345,7 +345,7 @@ export default function CollabPage() {
                         value={minAptos}
                         className="bg-accent text-md"
                         onChange={(e) => {
-                          let value = parseFloat(
+                          const value = parseFloat(
                             e.target.value.replace(/,/g, "")
                           );
                           if (isNaN(value) || value < 0) {
@@ -391,7 +391,7 @@ export default function CollabPage() {
                         value={maxAptos}
                         className="bg-accent text-md"
                         onChange={(e) => {
-                          let value = parseFloat(
+                          const value = parseFloat(
                             e.target.value.replace(/,/g, "")
                           );
                           if (isNaN(value) || value < 0) {

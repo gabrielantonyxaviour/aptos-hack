@@ -57,7 +57,8 @@ export default function NewUser() {
       <div>
         <p className="text-xl font-semibold text-center">Create Account</p>
         <p className="text-md text-center text-muted-foreground">
-          Welcome to SocioBerries. Let's get started by creating your profile.
+          Welcome to SocioBerries. Let&apos;s get started by creating your
+          profile.
         </p>
       </div>
 
