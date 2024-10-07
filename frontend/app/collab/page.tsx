@@ -233,7 +233,7 @@ export default function CollabPage() {
             <div className="flex flex-col space-y-4 w-full pr-4 py-4">
               <div className="flex justify-center py-6 ">
                 <Image
-                  src={"/onboarding/1.png"}
+                  src={"/avatar.jpeg"}
                   width={250}
                   height={250}
                   alt="Collab"
