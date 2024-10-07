@@ -107,7 +107,12 @@ export default function SideBar() {
             </div>
           ))}
           <div className=" flex-1 flex flex-col justify-end">
-            <div className="flex items-center  space-x-3">
+            <div
+              className="flex items-center  space-x-3 hover:scale-110 cursor-pointer transition ease-in-out duration-150"
+              onClick={() => {
+                router.push("/profile");
+              }}
+            >
               <Image
                 src={"/avatar.jpeg"}
                 width={30}

@@ -2,8 +2,10 @@ import Image from "next/image";
 import WalletInfo from "./wallet-info";
 import { Separator } from "../separator";
 import SuggestedProfile from "./suggested-profile";
+import { useRouter } from "next/navigation";
 
 export default function Suggested() {
+  const router = useRouter();
   const profiles = [
     {
       id: 1,
@@ -21,7 +23,12 @@ export default function Suggested() {
   return (
     <div className="w-[25%] flex flex-col">
       <div className="flex justify-between items-center">
-        <div className="flex items-center  space-x-3 py-2">
+        <div
+          className="flex items-center space-x-3 py-2 hover:scale-110 cursor-pointer transition ease-in-out duration-150"
+          onClick={() => {
+            router.push("/profile");
+          }}
+        >
           <Image
             src={"/avatar.jpeg"}
             width={30}
