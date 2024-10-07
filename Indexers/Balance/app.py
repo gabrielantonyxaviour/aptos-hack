@@ -7,17 +7,31 @@ GRAPHQL_URL = "https://aptos-testnet.nodit.io/hc7lkqT6G~1HLw~rQUcPPuagh39b1E~K/v
 
 @app.get("/coin_balances/")
 async def get_coin_balances(address: str = Query(..., description="Account address to query")):
-    query = """
-    query MyQuery {
-      coin_balances(
-        where: {owner_address: {_eq: "%s"}},
-        limit: 1
-      ) {
-        coin_type
+    query = f"""
+    query MyQuery {{
+      current_fungible_asset_balances(
+        where: {{
+          owner_address: {{_eq: "{address}"}},
+          asset_type: {{_eq: "0x9a973cf48c71b8c4923d12dd1a6adc4308f80cec3ecacbf6ede4bf137fb91aaa"}}
+        }},
+        limit: 10,
+        offset: 0
+      ) {{
+        owner_address
         amount
-      }
-    }
-    """ % address
+        storage_id
+        last_transaction_version
+        last_transaction_timestamp
+        is_frozen
+        metadata {{
+          asset_type
+          name
+          symbol
+          supply_v2
+        }}
+      }}
+    }}
+    """
 
     try:
         response = requests.post(GRAPHQL_URL, json={"query": query})
