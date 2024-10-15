@@ -22,6 +22,7 @@ export default function OnboardingPage() {
       window.location.href = "/home";
     }
   }, [pathName, account]);
+
   return (
     <>
       <div className="lg:p-8 max-w-[1000px] mx-auto flex flex-col justify-center items-center h-screen">

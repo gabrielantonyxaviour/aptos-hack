@@ -19,6 +19,7 @@ import {
   ISuccessResult,
 } from "@worldcoin/idkit";
 import { availableCatgegories } from "@/lib/utils";
+import { useEnvironmentStore } from "@/components/context";
 
 export default function NewUser() {
   const [image, setImage] = useState<File | null>(null);
@@ -34,6 +35,8 @@ export default function NewUser() {
   const { toast } = useToast();
   const { account, signAndSubmitTransaction } = useWallet();
   const router = useRouter();
+
+  const { updateProfile } = useEnvironmentStore((store) => store);
 
   const [nullifierHash, setNullifierHash] = useState("");
   useEffect(() => {
@@ -364,6 +367,18 @@ export default function NewUser() {
                 toast({
                   title: "Creating Profile 3/3",
                   description: "Profile created Successfully.",
+                });
+                updateProfile({
+                  name: name,
+                  username: username,
+                  bio: bio,
+                  niches: niches,
+                  preferences: preferences,
+                  image: blob,
+                  followers: 0,
+                  following: 0,
+                  balance: "0",
+                  humanness_nullifier: nullifierHash,
                 });
                 router.push("/home");
               }}

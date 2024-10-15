@@ -16,10 +16,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     setHasPosts,
     updateBrand,
     updatePosts,
+    setPosts,
+    setApplications,
+    setBrands,
   } = useEnvironmentStore((store) => store);
   useEffect(() => {
     if (account == undefined) {
       router.push("/");
+      setHasProfile(2);
     } else {
       (async function () {
         try {
@@ -104,6 +108,70 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             });
           } else {
             console.log("Brand Profile not found");
+          }
+        } catch (e) {
+          console.log(e);
+        }
+      })();
+      (async function () {
+        try {
+          const res = await fetch(`/api/user?AccountAddress=${CORE_MODULE}`);
+          const response = await res.json();
+          const { resources } = response.data;
+
+          // FETCH PROFILE
+          const comprehensiveData = (resources as any[]).find(
+            (r) =>
+              r.type ===
+              `${CORE_MODULE}::SocialMediaPlatform::ComprehensiveData`
+          );
+          if (comprehensiveData != undefined) {
+            console.log("Environment Data found");
+            console.log(comprehensiveData);
+            const { posts, applications, brand_profiles } =
+              comprehensiveData.data;
+
+            setPosts(
+              posts.data.map((post: any, idx: number) => {
+                return {
+                  id: idx,
+                  caption: post.value[0].caption,
+                  comments: post.value[0].comments,
+                  image: post.value[0].content_hash,
+                  status: post.value[0].status,
+                  isPromotional: post.value[0].is_promotional,
+                  likes: 0,
+                  promotedProfile: post.is_promotional
+                    ? post.promoted_profile
+                    : "0x",
+                };
+              })
+            );
+            setApplications(
+              applications.data.map((app: any, idx: number) => {
+                return {
+                  id: idx,
+                  description: app.value[0].description,
+                  minRewards: app.value[0].min_rewards,
+                  maxRewards: app.value[0].max_rewards,
+                  minBerries: app.value[0].min_berries_required,
+                };
+              })
+            );
+            setBrands(
+              brand_profiles.data[0].value.map((brand: any) => {
+                return {
+                  id: brand.id,
+                  brandDescription: brand.collab_description,
+                  minBerries: brand.min_berries_required,
+                  minRewards: brand.min_rewards,
+                  maxRewards: brand.max_rewards,
+                };
+              })
+            );
+          } else {
+            setHasProfile(2);
+            console.log("Environment Data not found");
           }
         } catch (e) {
           console.log(e);
