@@ -8,9 +8,9 @@
 4. Follow - DONE
 5. Unfollow - DONE
 6. Like - DONE
-7. Create promotion -
-8. Update promotion -
-9. Apply for promotion -
+7. Create promotion - DONE
+8. Update promotion - DONE
+9. Apply for promotion - DONE
 10. Accept promotion - DITCHED
 11. Add WorldID Verification
 

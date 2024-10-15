@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
+import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
 import { formattedNumber } from "@/lib/utils";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -15,6 +17,7 @@ export default function BusinessTab() {
   const [minAptos, setMinAptos] = useState<string>("1,000");
   const [maxAptos, setMaxAptos] = useState<string>("10,000");
   const preferences = ["Travel", "Fashion", "Music", "Food & Drink", "Gaming"];
+  const { account, signAndSubmitTransaction } = useWallet();
 
   const influencers = [
     {
@@ -45,6 +48,8 @@ export default function BusinessTab() {
     },
   ];
   useEffect(() => {}, [minAptos, maxAptos]);
+
+  const brandProfileCreated = false;
 
   return (
     <div className="flex flex-col space-y-4 w-full pr-4 py-4">
@@ -207,84 +212,139 @@ export default function BusinessTab() {
         <Button variant={"ghost"} className="font-medium px-12 text-lg">
           Reset
         </Button>
-        <Button variant={"secondary"} className="font-semibold px-12 text-lg">
-          Update
+        <Button
+          variant={"secondary"}
+          className="font-semibold px-12 text-lg"
+          onClick={async () => {
+            if (account == undefined) return;
+
+            const aptos = getAptosClient();
+            if (brandProfileCreated) {
+              const updateBrandProfileTx = await signAndSubmitTransaction({
+                sender: account.address,
+                data: {
+                  function: `${CORE_MODULE}::SocialMediaPlatform::update_brand_profile`,
+                  functionArguments: [
+                    Array.from(new TextEncoder().encode(adDesc)),
+                    parseInt(minBerries.replace(/,/g, "")),
+                    parseInt(minAptos.replace(/,/g, "")),
+                    parseInt(maxAptos.replace(/,/g, "")),
+                  ],
+                  typeArguments: [],
+                },
+              });
+              console.log(updateBrandProfileTx);
+              const executedTransaction = await aptos.waitForTransaction({
+                transactionHash: updateBrandProfileTx.hash,
+              });
+
+              console.log(executedTransaction);
+            } else {
+              const createBrandProfileTx = await signAndSubmitTransaction({
+                sender: account.address,
+                data: {
+                  function: `${CORE_MODULE}::SocialMediaPlatform::create_brand_profile`,
+                  functionArguments: [
+                    Array.from(new TextEncoder().encode(adDesc)),
+                    parseInt(minBerries.replace(/,/g, "")),
+                    parseInt(minAptos.replace(/,/g, "")),
+                    parseInt(maxAptos.replace(/,/g, "")),
+                  ],
+                  typeArguments: [],
+                },
+              });
+              console.log(createBrandProfileTx);
+              const executedTransaction = await aptos.waitForTransaction({
+                transactionHash: createBrandProfileTx.hash,
+              });
+
+              console.log(executedTransaction);
+            }
+          }}
+        >
+          {brandProfileCreated ? "Update" : "Create"}
         </Button>
       </div>
-
-      <p className="font-semibold text-lg pt-4">Influencers</p>
-      <div className="flex flex-col space-y-2">
-        {influencers.map((i, idx) => (
-          <Card key={idx}>
-            <CardContent className="p-4">
-              <div className="flex justify-between">
-                <div
-                  className="flex space-x-4  hover:scale-110 cursor-pointer transition ease-in-out duration-150"
-                  onClick={() => {
-                    router.push("/profile");
-                  }}
-                >
-                  <Image
-                    src={i.image}
-                    width={50}
-                    height={50}
-                    alt="User"
-                    className="rounded-full"
-                  />
-                  <div>
-                    <p className="font-semibold text-lg">{i.name}</p>
-                    <p className="text-muted-foreground ">{i.username}</p>
+      {brandProfileCreated && (
+        <>
+          <p className="font-semibold text-lg pt-4">Influencers</p>
+          <div className="flex flex-col space-y-2">
+            {influencers.map((i, idx) => (
+              <Card key={idx}>
+                <CardContent className="p-4">
+                  <div className="flex justify-between">
+                    <div
+                      className="flex space-x-4  hover:scale-110 cursor-pointer transition ease-in-out duration-150"
+                      onClick={() => {
+                        router.push("/profile");
+                      }}
+                    >
+                      <Image
+                        src={i.image}
+                        width={50}
+                        height={50}
+                        alt="User"
+                        className="rounded-full"
+                      />
+                      <div>
+                        <p className="font-semibold text-lg">{i.name}</p>
+                        <p className="text-muted-foreground ">{i.username}</p>
+                      </div>
+                    </div>
+                    <div className="flex space-x-6">
+                      <div className="flex space-x-2 items-center">
+                        <Image
+                          src={"/logo.png"}
+                          width={35}
+                          height={35}
+                          alt="berries"
+                        />
+                        <p className="text-lg font-semibold">
+                          {formattedNumber(i.berries)}
+                        </p>
+                      </div>
+                      <div className="flex space-x-2 items-center">
+                        <Image
+                          src={"/dragon.jpg"}
+                          width={35}
+                          height={35}
+                          alt="dragon"
+                          className="rounded-full"
+                        />
+                        <p className="text-lg font-semibold">
+                          {formattedNumber(i.dragonFruitBlasts)}
+                        </p>
+                      </div>
+                      <div className="flex space-x-2 items-center">
+                        <Image
+                          src={"/collab.png"}
+                          width={35}
+                          height={35}
+                          alt="collab"
+                        />
+                        <p className="text-lg font-semibold">
+                          {formattedNumber(i.collabs)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex justify-center space-x-2">
+                      <Button variant={"ghost"} className="font-medium text-lg">
+                        Dismiss
+                      </Button>
+                      <Button
+                        variant={"outline"}
+                        className="font-semibold text-lg"
+                      >
+                        Confirm
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                <div className="flex space-x-6">
-                  <div className="flex space-x-2 items-center">
-                    <Image
-                      src={"/logo.png"}
-                      width={35}
-                      height={35}
-                      alt="berries"
-                    />
-                    <p className="text-lg font-semibold">
-                      {formattedNumber(i.berries)}
-                    </p>
-                  </div>
-                  <div className="flex space-x-2 items-center">
-                    <Image
-                      src={"/dragon.jpg"}
-                      width={35}
-                      height={35}
-                      alt="dragon"
-                      className="rounded-full"
-                    />
-                    <p className="text-lg font-semibold">
-                      {formattedNumber(i.dragonFruitBlasts)}
-                    </p>
-                  </div>
-                  <div className="flex space-x-2 items-center">
-                    <Image
-                      src={"/collab.png"}
-                      width={35}
-                      height={35}
-                      alt="collab"
-                    />
-                    <p className="text-lg font-semibold">
-                      {formattedNumber(i.collabs)}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex justify-center space-x-2">
-                  <Button variant={"ghost"} className="font-medium text-lg">
-                    Dismiss
-                  </Button>
-                  <Button variant={"outline"} className="font-semibold text-lg">
-                    Confirm
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

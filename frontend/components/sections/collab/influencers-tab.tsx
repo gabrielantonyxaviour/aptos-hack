@@ -2,10 +2,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
 import { formattedNumber } from "@/lib/utils";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import Image from "next/image";
 
 export default function InfluencersTab() {
+  const { account, signAndSubmitTransaction } = useWallet();
   const berries = 20000;
   const collabs = [
     {
@@ -129,6 +132,27 @@ export default function InfluencersTab() {
                   variant={"secondary"}
                   className="w-full font-semibold"
                   disabled={berries < collab.requiredBerries}
+                  onClick={async () => {
+                    if (account == undefined) return;
+
+                    const aptos = getAptosClient();
+                    const applyCollabTx = await signAndSubmitTransaction({
+                      sender: account.address,
+                      data: {
+                        function: `${CORE_MODULE}::SocialMediaPlatform::apply_collab`,
+                        functionArguments: [
+                          "0x0000000000000000000000000000000000000000000000000000000000000000", // TODO: Need to remove hardcoding
+                        ],
+                        typeArguments: [],
+                      },
+                    });
+                    console.log(applyCollabTx);
+                    const executedTransaction = await aptos.waitForTransaction({
+                      transactionHash: applyCollabTx.hash,
+                    });
+
+                    console.log(executedTransaction);
+                  }}
                 >
                   {collab.requiredBerries > berries
                     ? "Insufficient Berries"
