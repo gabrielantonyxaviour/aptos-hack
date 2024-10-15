@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { WalletProvider } from "@/components/providers/wallet-provider";
 import { WrongNetworkAlert } from "@/components/ui/custom/wrong-network-alert";
 import { EnvironmentStoreProvider } from "@/components/context";
-
+import Layout from "@/components/layout";
 
 export const metadata: Metadata = {
   title: "SocioBerries",
@@ -20,8 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-      >
+      <body>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -32,7 +31,7 @@ export default function RootLayout({
             <EnvironmentStoreProvider>
               <Toaster />
               <WrongNetworkAlert />
-              {children}
+              <Layout>{children}</Layout>
             </EnvironmentStoreProvider>
           </WalletProvider>
         </ThemeProvider>

@@ -1,8 +1,10 @@
 import { createStore } from "zustand";
 import { createProfileSlice, ProfileSlice } from "./profileSlice";
-export type EnvironmentStore = ProfileSlice;
+import { createEnvironmentSlice, EnvironmentSlice } from "./environmentSlice";
+export type EnvironmentStore = ProfileSlice & EnvironmentSlice;
 
 export const createEnvironmentStore = () =>
   createStore<EnvironmentStore>()((...a) => ({
     ...createProfileSlice(...a),
+    ...createEnvironmentSlice(...a),
   }));

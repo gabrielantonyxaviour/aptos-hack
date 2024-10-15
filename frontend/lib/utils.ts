@@ -14,3 +14,25 @@ export function formattedNumber(num: number): string {
     return num.toString();
   }
 }
+
+export function hexToString(hex: string): string {
+  let result = "";
+  for (let i = 0; i < hex.length; i += 2) {
+    // Convert each pair of hex characters (one byte) into a decimal number
+    const hexByte = hex.substring(i, 2 + i);
+    const charCode = parseInt(hexByte, 16); // Convert hex to decimal
+    result += String.fromCharCode(charCode); // Convert decimal to character
+  }
+  return result;
+}
+export function hexToNumberArray(hex: string): string[] {
+  const result: string[] = [];
+
+  for (let i = 0; i < hex.length; i += 2) {
+    const hexByte = hex.substring(i, i + 2);
+    const num = parseInt(hexByte, 16); // Convert hex to decimal
+    result.push(num.toString());
+  }
+
+  return result;
+}
