@@ -5,9 +5,9 @@
 1. Create Account - DONE
 2. Create post - DONE
 3. Create comment - DONE
-4. Follow
-5. Like
-6. Create promotion
+4. Follow - DONE
+5. Like -
+6. Create promotion -
 7. Apply for promotion
 8. Add WorldID Verification
 
