@@ -7,8 +7,8 @@ interface ProfileState {
   image: string;
   following: number;
   followers: number;
-  niches: string[];
-  preferences: string[];
+  niches: number[];
+  preferences: number[];
   balance: string;
   humanness_nullifier: string;
 }

@@ -25,6 +25,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import SuggestedProfile from "../ui/custom/suggested-profile";
+import { useEnvironmentStore } from "../context";
 export default function SideBar() {
   const [showSearch, setShowSearch] = useState(false);
   const pathname = usePathname();
@@ -81,6 +82,7 @@ export default function SideBar() {
       image: "/onboarding/2.jpg",
     },
   ];
+  const { username, image } = useEnvironmentStore((store) => store);
   return (
     <>
       <div className="h-full border-r-[1px] border-r-secondary py-4 px-8 flex flex-col">
@@ -114,15 +116,13 @@ export default function SideBar() {
               }}
             >
               <Image
-                src={"/avatar.jpeg"}
+                src={`https://aggregator-devnet.walrus.space/v1/${image}`}
                 width={30}
                 height={30}
                 alt="Profile"
                 className="rounded-full"
               />
-              <p className="text-white text-sm font-semibold">
-                gabrielaxy.aptos
-              </p>
+              <p className="text-white text-sm font-semibold">{username}</p>
             </div>
           </div>
         </div>

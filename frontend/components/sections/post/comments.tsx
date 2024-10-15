@@ -16,6 +16,7 @@ import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
+import { useEnvironmentStore } from "@/components/context";
 export default function Comments({ postId }: { postId: number }) {
   const comments = [
     {
@@ -39,6 +40,7 @@ export default function Comments({ postId }: { postId: number }) {
   ];
   const [comment, setComment] = useState<string>("");
   const { account, signAndSubmitTransaction } = useWallet();
+  const { image } = useEnvironmentStore((store) => store);
   return (
     <Card className="h-[90vh] flex flex-col">
       <CardHeader>
@@ -60,7 +62,7 @@ export default function Comments({ postId }: { postId: number }) {
         <Separator className="my-2" />
         <div className="flex items-center">
           <Image
-            src={"/avatar.jpeg"}
+            src={`https://aggregator-devnet.walrus.space/v1/${image}`}
             width={30}
             height={30}
             alt="Avatar"

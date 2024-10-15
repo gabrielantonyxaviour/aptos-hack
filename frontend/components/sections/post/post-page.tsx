@@ -15,10 +15,12 @@ import {
 import { BarChart, Heart, MessageCircle, UserMinusIcon } from "lucide-react";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
+import { useEnvironmentStore } from "@/components/context";
 
 export default function PostPage({ postId }: { postId: number }) {
   const isLiked = false; // TODO: Remove hardcoding
   const { account, signAndSubmitTransaction } = useWallet();
+  const { username, image } = useEnvironmentStore((store) => store);
   return (
     <Card className="mb-4 mr-4 h-[90vh]">
       <CardHeader className="p-3 m-0">
@@ -30,7 +32,7 @@ export default function PostPage({ postId }: { postId: number }) {
             }}
           >
             <Image
-              src={"/avatar.jpeg"}
+              src={`https://aggregator-devnet.walrus.space/v1/${image}`}
               width={30}
               height={30}
               alt="Avatar"
@@ -38,7 +40,7 @@ export default function PostPage({ postId }: { postId: number }) {
             />
             <div className="flex flex-col">
               <p className="font-semibold hover:scale-105 hover:-translate-y-[1px] transition duration-150 ease-in-out">
-                gabrielaxy.aptos
+                {username}
               </p>
               <p className="text-xs text-muted-foreground">📍Singapore</p>
             </div>
@@ -118,7 +120,7 @@ export default function PostPage({ postId }: { postId: number }) {
           </TooltipProvider>
         </div>
         <p className="font-semibold px-3">
-          gabrielaxy.aptos &nbsp;
+          {username} &nbsp;
           <span className="text-sm font-medium">too cool for this app</span>
         </p>
       </CardContent>

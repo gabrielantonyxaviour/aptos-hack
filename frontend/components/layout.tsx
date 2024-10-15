@@ -46,7 +46,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               ),
               balance: "0",
             });
-            if (pathName === "/onboarding") {
+            if (pathName === "/") {
               router.push("/home");
             }
           } else {

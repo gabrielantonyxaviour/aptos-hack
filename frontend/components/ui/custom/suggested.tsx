@@ -3,6 +3,7 @@ import WalletInfo from "./wallet-info";
 import { Separator } from "../separator";
 import SuggestedProfile from "./suggested-profile";
 import { useRouter } from "next/navigation";
+import { useEnvironmentStore } from "@/components/context";
 
 export default function Suggested() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function Suggested() {
       image: "/onboarding/2.jpg",
     },
   ];
+  const { image, username, name } = useEnvironmentStore((store) => store);
   return (
     <div className="w-[25%] flex flex-col">
       <div className="flex justify-between items-center">
@@ -30,15 +32,15 @@ export default function Suggested() {
           }}
         >
           <Image
-            src={"/avatar.jpeg"}
+            src={`https://aggregator-devnet.walrus.space/v1/${image}`}
             width={30}
             height={30}
             alt="Profile"
             className="rounded-full"
           />
           <div className="flex flex-col">
-            <p className="text-white text-sm font-semibold">gabrielaxy.aptos</p>
-            <p className="text-sm text-muted-foreground">Gabriel</p>
+            <p className="text-white text-sm font-semibold">{username}</p>
+            <p className="text-sm text-muted-foreground">{name}</p>
           </div>
         </div>
         <WalletInfo />

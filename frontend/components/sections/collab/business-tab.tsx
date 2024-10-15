@@ -1,3 +1,4 @@
+import { useEnvironmentStore } from "@/components/context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -48,6 +49,8 @@ export default function BusinessTab() {
     },
   ];
   useEffect(() => {}, [minAptos, maxAptos]);
+  const { username, name, followers, following, bio, image } =
+    useEnvironmentStore((store) => store);
 
   const brandProfileCreated = false;
 
@@ -55,21 +58,21 @@ export default function BusinessTab() {
     <div className="flex flex-col space-y-4 w-full pr-4 py-4">
       <div className="flex justify-center py-6 ">
         <Image
-          src={"/avatar.jpeg"}
+          src={`https://aggregator-devnet.walrus.space/v1/${image}`}
           width={250}
           height={250}
           alt="Collab"
           className="rounded-full"
         />
         <div className="flex flex-col  space-y-2 px-12 justify-center">
-          <p className="text-lg font-semibold">gabrielaxy.aptos</p>
+          <p className="text-lg font-semibold">{username}</p>
           <div className="flex justify-start space-x-16 pt-4">
             <p className="text-md font-semibold">1 post</p>
-            <p className="text-md font-semibold">420 followers</p>
-            <p className="text-md font-semibold">69 following</p>
+            <p className="text-md font-semibold">{followers} followers</p>
+            <p className="text-md font-semibold">{following} following</p>
           </div>
-          <p className="font-semibold pt-4">Gabriel</p>
-          <p className=" text-sm">I am him. He is me. My prononus are Sig/ma</p>
+          <p className="font-semibold pt-4">{name}</p>
+          <p className=" text-sm">{bio}</p>
           <div className="flex space-x-2">
             {preferences.map((p, idx) => (
               <Badge key={idx} className="m-0">

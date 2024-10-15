@@ -1,4 +1,5 @@
 "use client";
+import { useEnvironmentStore } from "@/components/context";
 import SideBar from "@/components/sections/side-nav";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,30 @@ export default function ProfilePage() {
   const isFollowing = false;
   const { account, signAndSubmitTransaction } = useWallet();
   const [hoveringUnfollow, setHoveringUnfollow] = useState<boolean>(false);
+  const { username, image, name, followers, following, bio, niches } =
+    useEnvironmentStore((store) => store);
+  const availableCatgegories = [
+    "Technology",
+    "Health & Fitness",
+    "Travel",
+    "Fashion",
+    "Music",
+    "Food & Drink",
+    "Gaming",
+    "Movies & TV Shows",
+    "Business & Finance",
+    "Sports",
+    "Art & Design",
+    "Photography",
+    "Books & Literature",
+    "Science",
+    "Personal Development",
+    "Politics",
+    "Education",
+    "Lifestyle",
+    "Entrepreneurship",
+    "Environment",
+  ];
   return (
     <div className="flex h-screen select-none">
       <SideBar />
@@ -26,7 +51,7 @@ export default function ProfilePage() {
           <ScrollArea className="h-[95vh]">
             <div className="flex space-x-16 px-4">
               <Image
-                src={"/avatar.jpeg"}
+                src={`https://aggregator-devnet.walrus.space/v1/${image}`}
                 width={180}
                 height={180}
                 alt="hero"
@@ -34,7 +59,7 @@ export default function ProfilePage() {
               />
               <div className="flex flex-col flex-1 space-y-2">
                 <div className="flex justify-between items-center">
-                  <p className="text-lg font-semibold">gabrielaxy.aptos</p>
+                  <p className="text-lg font-semibold">{username}</p>
                   {isYourProfile ? (
                     <WalletInfo />
                   ) : (
@@ -116,17 +141,15 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex justify-start space-x-16 pt-4">
                   <p className="text-md font-semibold">1 post</p>
-                  <p className="text-md font-semibold">420 followers</p>
-                  <p className="text-md font-semibold">69 following</p>
+                  <p className="text-md font-semibold">{followers} followers</p>
+                  <p className="text-md font-semibold">{following} following</p>
                 </div>
-                <p className="font-semibold pt-4">Gabriel</p>
-                <p className=" text-sm">
-                  I am him. He is me. My prononus are Sig/ma
-                </p>
+                <p className="font-semibold pt-4">{name}</p>
+                <p className=" text-sm">{bio}</p>
                 <div className="flex space-x-2">
-                  {preferences.map((p, idx) => (
+                  {niches.map((p, idx) => (
                     <Badge key={idx} className="m-0">
-                      {p}
+                      {availableCatgegories[p]}
                     </Badge>
                   ))}
                 </div>

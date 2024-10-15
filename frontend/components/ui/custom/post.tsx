@@ -22,8 +22,10 @@ import {
 import { BarChart, Heart, MessageCircle, UserMinusIcon } from "lucide-react";
 import { Input } from "../input";
 import { useRouter } from "next/navigation";
+import { useEnvironmentStore } from "@/components/context";
 export default function Post() {
   const router = useRouter();
+  const { username, image } = useEnvironmentStore((store) => store);
   return (
     <Card className="mb-4 mr-4">
       <CardHeader className="p-3 m-0">
@@ -35,7 +37,7 @@ export default function Post() {
             }}
           >
             <Image
-              src={"/avatar.jpeg"}
+              src={`https://aggregator-devnet.walrus.space/v1/${image}`}
               width={30}
               height={30}
               alt="Avatar"
@@ -43,7 +45,7 @@ export default function Post() {
             />
             <div className="flex flex-col">
               <p className="font-semibold hover:scale-105 hover:-translate-y-[1px] transition duration-150 ease-in-out">
-                gabrielaxy.aptos
+                {username}
               </p>
               <p className="text-xs text-muted-foreground">📍Singapore</p>
             </div>
@@ -99,7 +101,7 @@ export default function Post() {
           </TooltipProvider>
         </div>
         <p className="font-semibold px-3">
-          gabrielaxy.aptos &nbsp;
+          {username} &nbsp;
           <span className="text-sm font-medium">too cool for this app</span>
         </p>
         <p className="px-4 pt-1 text-muted-foreground text-sm">
@@ -107,7 +109,7 @@ export default function Post() {
         </p>
         <div className="flex px-3 items-center">
           <Image
-            src={"/avatar.jpeg"}
+            src={`https://aggregator-devnet.walrus.space/v1/${image}`}
             width={30}
             height={30}
             alt="Avatar"

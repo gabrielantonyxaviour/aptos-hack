@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Check, Trash } from "lucide-react";
 import Image from "next/image";
@@ -56,8 +56,10 @@ export default function NewUser() {
     "Environment",
   ];
 
-  const [worldVerified, setWorldVerified] = useState(false);
-
+  const [nullifierHash, setNullifierHash] = useState("");
+  useEffect(() => {
+    console.log(process.env.NEXT_PUBLIC_WORLDCOIN_APP_ID);
+  }, []);
   return (
     <div className="mx-auto flex w-full flex-col justify-center space-y-6 ">
       <div className="flex justify-between items-center">
@@ -207,7 +209,7 @@ export default function NewUser() {
                     if (niches.includes(idx)) {
                       setNiches(niches.filter((n, id) => n !== idx));
                     } else {
-                      setNiches([...niches, idx]);
+                      if (niches.length < 5) setNiches([...niches, idx]);
                     }
                   }}
                 >
@@ -238,7 +240,8 @@ export default function NewUser() {
                     if (preferences.includes(idx)) {
                       setPreferences(preferences.filter((n) => n !== idx));
                     } else {
-                      setPreferences([...preferences, idx]);
+                      if (preferences.length < 5)
+                        setPreferences([...preferences, idx]);
                     }
                   }}
                 >
@@ -254,18 +257,19 @@ export default function NewUser() {
           <div className="flex justify-end pb-4 space-x-2">
             <IDKitWidget
               app_id={
-                (process.env.WORLDCOIN_APP_ID as `app_${string}`) || "app_xxx"
+                (process.env.NEXT_PUBLIC_WORLDCOIN_APP_ID as `app_${string}`) ||
+                "app_xxx"
               }
               action="verify-humanness"
               onSuccess={(res: ISuccessResult) => {
                 console.log("PROOF OF HUMNITY SUCCESS");
                 console.log(res);
-                setWorldVerified(true);
+                setNullifierHash(res.nullifier_hash);
               }}
               handleVerify={(res: ISuccessResult) => {
                 console.log("PROOF OF HUMNITY HANDLE GENERATED");
                 console.log(res);
-                setWorldVerified(true);
+                setNullifierHash(res.nullifier_hash);
               }}
               verification_level={VerificationLevel.Orb}
             >
@@ -276,9 +280,9 @@ export default function NewUser() {
                   onClick={() => {
                     open();
                   }}
-                  disabled={worldVerified}
+                  disabled={nullifierHash != ""}
                 >
-                  {worldVerified ? (
+                  {nullifierHash != "" ? (
                     <>
                       <Check className="w-5 h-5" />
                       <p className="font-semibold">Verified Human</p>
@@ -301,56 +305,87 @@ export default function NewUser() {
             <Button
               variant={"default"}
               className="font-semibold text-md p-6"
-              disabled={!worldVerified}
+              disabled={
+                nullifierHash == "" ||
+                image == null ||
+                account == undefined ||
+                name == "" ||
+                username == "" ||
+                bio == "" ||
+                niches.length == 0 ||
+                preferences.length == 0
+              }
               onClick={async () => {
-                // if (image == null || account == undefined) {
-                //   console.log(image);
-                //   console.log(account);
-                //   console.log("Image or Accont is null");
-                //   return;
-                // }
+                if (
+                  nullifierHash == "" ||
+                  image == null ||
+                  account == undefined ||
+                  name == "" ||
+                  username == "" ||
+                  bio == "" ||
+                  niches.length == 0 ||
+                  preferences.length == 0
+                ) {
+                  console.log(image);
+                  console.log(account);
+                  console.log("Image or Accont is null");
+                  toast({
+                    title: "Error",
+                    description: "Please fill all the fields",
+                  });
+                  return;
+                }
 
                 // // Upload the image to Walrus
-                // let blob = "iYNRDh_9hD5hC_qPOOe4zToXbKYu4QRulWwG4j48uik";
-                // if (blob == "") {
-                //   await uploadToWalrus(
-                //     image,
-                //     (blobId) => {
-                //       blob = blobId;
-                //       setImageCid(blobId);
-                //     },
-                //     (error) => {
-                //       console.log(error);
-                //     }
-                //   );
-                // }
+                toast({
+                  title: "Creating Profile 1/3",
+                  description: "Uploading your profile to Walrus...",
+                });
+                let blob = "";
+                if (blob == "") {
+                  await uploadToWalrus(
+                    image,
+                    (blobId) => {
+                      blob = blobId;
+                      setImageCid(blobId);
+                    },
+                    (error) => {
+                      console.log(error);
+                    }
+                  );
+                }
 
-                // // TODO: Send a transaction to create a new user
-                // // TODO: Update zustand state
-                // const aptos = getAptosClient();
+                const aptos = getAptosClient();
+                toast({
+                  title: "Creating Profile 2/3",
+                  description: "Triggering transaction ...",
+                });
+                const createProfileTx = await signAndSubmitTransaction({
+                  sender: account.address,
+                  data: {
+                    function: `${CORE_MODULE}::SocialMediaPlatform::create_profile`,
+                    functionArguments: [
+                      Array.from(new TextEncoder().encode(username)),
+                      Array.from(new TextEncoder().encode(name)),
+                      Array.from(new TextEncoder().encode(bio)),
+                      blob,
+                      preferences,
+                      niches,
+                      nullifierHash,
+                    ],
+                    typeArguments: [],
+                  },
+                });
+                console.log(createProfileTx);
+                const executedTransaction = await aptos.waitForTransaction({
+                  transactionHash: createProfileTx.hash,
+                });
 
-                // const createProfileTx = await signAndSubmitTransaction({
-                //   sender: account.address,
-                //   data: {
-                //     function: `${CORE_MODULE}::SocialMediaPlatform::create_profile`,
-                //     functionArguments: [
-                //       Array.from(new TextEncoder().encode(username)),
-                //       Array.from(new TextEncoder().encode(name)),
-                //       Array.from(new TextEncoder().encode(bio)),
-                //       blob,
-                //       preferences,
-                //       niches,
-                //     ],
-                //     typeArguments: [],
-                //   },
-                // });
-                // console.log(createProfileTx);
-                // const executedTransaction = await aptos.waitForTransaction({
-                //   transactionHash: createProfileTx.hash,
-                // });
-
-                // console.log(executedTransaction);
-
+                console.log(executedTransaction);
+                toast({
+                  title: "Creating Profile 3/3",
+                  description: "Profile created Successfully.",
+                });
                 router.push("/home");
               }}
             >
