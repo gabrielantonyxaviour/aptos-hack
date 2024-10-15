@@ -18,6 +18,7 @@ import {
   VerificationLevel,
   ISuccessResult,
 } from "@worldcoin/idkit";
+import { availableCatgegories } from "@/lib/utils";
 
 export default function NewUser() {
   const [image, setImage] = useState<File | null>(null);
@@ -33,28 +34,6 @@ export default function NewUser() {
   const { toast } = useToast();
   const { account, signAndSubmitTransaction } = useWallet();
   const router = useRouter();
-  const availableCatgegories = [
-    "Technology",
-    "Health & Fitness",
-    "Travel",
-    "Fashion",
-    "Music",
-    "Food & Drink",
-    "Gaming",
-    "Movies & TV Shows",
-    "Business & Finance",
-    "Sports",
-    "Art & Design",
-    "Photography",
-    "Books & Literature",
-    "Science",
-    "Personal Development",
-    "Politics",
-    "Education",
-    "Lifestyle",
-    "Entrepreneurship",
-    "Environment",
-  ];
 
   const [nullifierHash, setNullifierHash] = useState("");
   useEffect(() => {

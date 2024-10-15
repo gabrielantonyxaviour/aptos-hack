@@ -36,3 +36,26 @@ export function hexToNumberArray(hex: string): number[] {
 
   return result;
 }
+
+export const availableCatgegories = [
+  "Technology",
+  "Health & Fitness",
+  "Travel",
+  "Fashion",
+  "Music",
+  "Food & Drink",
+  "Gaming",
+  "Movies & TV Shows",
+  "Business & Finance",
+  "Sports",
+  "Art & Design",
+  "Photography",
+  "Books & Literature",
+  "Science",
+  "Personal Development",
+  "Politics",
+  "Education",
+  "Lifestyle",
+  "Entrepreneurship",
+  "Environment",
+];

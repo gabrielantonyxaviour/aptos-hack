@@ -1,4 +1,3 @@
-"use client";
 import { useEnvironmentStore } from "@/components/context";
 import SideBar from "@/components/sections/side-nav";
 import { Badge } from "@/components/ui/badge";
@@ -12,15 +11,21 @@ import { availableCatgegories } from "@/lib/utils";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { Check, Plus, X } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
-
-export default function ProfilePage() {
-  const isYourProfile = false;
-  const isFollowing = false;
+import { useEffect, useState } from "react";
+export default function Profile({ username }: { username: string }) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [name, setName] = useState("");
+  const [image, setImage] = useState("");
+  const [followers, setFollowers] = useState(0);
+  const [following, setFollowing] = useState(0);
+  const [bio, setBio] = useState("");
+  const [niches, setNiches] = useState<number[]>([]);
+  const [isFollowing, setIsFollowing] = useState(false);
   const { account, signAndSubmitTransaction } = useWallet();
   const [hoveringUnfollow, setHoveringUnfollow] = useState<boolean>(false);
-  const { username, image, name, followers, following, bio, niches } =
-    useEnvironmentStore((store) => store);
+  useEffect(() => {
+    // TODO: Call and get the profile data and store it locally here
+  }, [username]);
 
   return (
     <div className="flex h-screen select-none">
@@ -39,84 +44,80 @@ export default function ProfilePage() {
               <div className="flex flex-col flex-1 space-y-2">
                 <div className="flex justify-between items-center">
                   <p className="text-lg font-semibold">{username}</p>
-                  {isYourProfile ? (
-                    <WalletInfo />
-                  ) : (
-                    <Button
-                      variant={"secondary"}
-                      className={`flex space-x-2 ${
-                        isFollowing
-                          ? "hover:bg-destructive transition ease-in-out duration-400 hover:scale-105"
-                          : "hover:bg-primary hover:text-black transition ease-in-out duration-400 hover:scale-105"
-                      } `}
-                      onMouseEnter={() => setHoveringUnfollow(true)}
-                      onMouseLeave={() => setHoveringUnfollow(false)}
-                      onClick={async () => {
-                        if (account == undefined) return;
 
-                        const aptos = getAptosClient();
-                        if (isFollowing) {
-                          const unfollowProfileTx =
-                            await signAndSubmitTransaction({
-                              sender: account.address,
-                              data: {
-                                function: `${CORE_MODULE}::SocialMediaPlatform::unfollow_user`,
-                                functionArguments: [
-                                  "0x2df1944b5fcffc2a53d2c75d4a86be38c1ab7cb32bba9db38f7141385786969a", // TODO: Remove hardcoding
-                                ],
-                                typeArguments: [],
-                              },
-                            });
-                          console.log(unfollowProfileTx);
-                          const executedTransaction =
-                            await aptos.waitForTransaction({
-                              transactionHash: unfollowProfileTx.hash,
-                            });
+                  <Button
+                    variant={"secondary"}
+                    className={`flex space-x-2 ${
+                      isFollowing
+                        ? "hover:bg-destructive transition ease-in-out duration-400 hover:scale-105"
+                        : "hover:bg-primary hover:text-black transition ease-in-out duration-400 hover:scale-105"
+                    } `}
+                    onMouseEnter={() => setHoveringUnfollow(true)}
+                    onMouseLeave={() => setHoveringUnfollow(false)}
+                    onClick={async () => {
+                      if (account == undefined) return;
 
-                          console.log(executedTransaction);
-                        } else {
-                          const followProfileTx =
-                            await signAndSubmitTransaction({
-                              sender: account.address,
-                              data: {
-                                function: `${CORE_MODULE}::SocialMediaPlatform::follow_user`,
-                                functionArguments: [
-                                  "0x2df1944b5fcffc2a53d2c75d4a86be38c1ab7cb32bba9db38f7141385786969a", // TODO: Remove hardcoding
-                                  "gabrielaxy", // TODO: Remove hardcoding
-                                ],
-                                typeArguments: [],
-                              },
-                            });
-                          console.log(followProfileTx);
-                          const executedTransaction =
-                            await aptos.waitForTransaction({
-                              transactionHash: followProfileTx.hash,
-                            });
+                      const aptos = getAptosClient();
+                      if (isFollowing) {
+                        const unfollowProfileTx =
+                          await signAndSubmitTransaction({
+                            sender: account.address,
+                            data: {
+                              function: `${CORE_MODULE}::SocialMediaPlatform::unfollow_user`,
+                              functionArguments: [
+                                "0x2df1944b5fcffc2a53d2c75d4a86be38c1ab7cb32bba9db38f7141385786969a", // TODO: Remove hardcoding
+                              ],
+                              typeArguments: [],
+                            },
+                          });
+                        console.log(unfollowProfileTx);
+                        const executedTransaction =
+                          await aptos.waitForTransaction({
+                            transactionHash: unfollowProfileTx.hash,
+                          });
 
-                          console.log(executedTransaction);
-                        }
-                      }}
-                    >
-                      {isFollowing ? (
-                        hoveringUnfollow ? (
-                          <>
-                            <X className="w-4 h-4" />
-                            <p className="font-semibold">Unfollow</p>
-                          </>
-                        ) : (
-                          <>
-                            <Check className="w-4 h-4" />
-                            <p className="font-semibold">Following</p>
-                          </>
-                        )
+                        console.log(executedTransaction);
+                      } else {
+                        const followProfileTx = await signAndSubmitTransaction({
+                          sender: account.address,
+                          data: {
+                            function: `${CORE_MODULE}::SocialMediaPlatform::follow_user`,
+                            functionArguments: [
+                              "0x2df1944b5fcffc2a53d2c75d4a86be38c1ab7cb32bba9db38f7141385786969a", // TODO: Remove hardcoding
+                              "gabrielaxy", // TODO: Remove hardcoding
+                            ],
+                            typeArguments: [],
+                          },
+                        });
+                        console.log(followProfileTx);
+                        const executedTransaction =
+                          await aptos.waitForTransaction({
+                            transactionHash: followProfileTx.hash,
+                          });
+
+                        console.log(executedTransaction);
+                      }
+                    }}
+                  >
+                    {isFollowing ? (
+                      hoveringUnfollow ? (
+                        <>
+                          <X className="w-4 h-4" />
+                          <p className="font-semibold">Unfollow</p>
+                        </>
                       ) : (
                         <>
-                          <Plus className="w-4 h-4" />
-                          <p className="font-semibold">Follow</p>
+                          <Check className="w-4 h-4" />
+                          <p className="font-semibold">Following</p>
                         </>
-                      )}
-                    </Button>
-                  )}
+                      )
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4" />
+                        <p className="font-semibold">Follow</p>
+                      </>
+                    )}
+                  </Button>
                 </div>
                 <div className="flex justify-start space-x-16 pt-4">
                   <p className="text-md font-semibold">1 post</p>
