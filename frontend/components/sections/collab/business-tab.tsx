@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
+import { useToast } from "@/hooks/use-toast";
 import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
 import { formattedNumber } from "@/lib/utils";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
@@ -13,6 +14,7 @@ import { useEffect, useState } from "react";
 
 export default function BusinessTab() {
   const router = useRouter();
+  const { toast } = useToast();
   const [adDesc, setAdDesc] = useState<string>("");
   const [minBerries, setMinBerries] = useState<string>("0");
   const [minAptos, setMinAptos] = useState<string>("1,000");
@@ -223,6 +225,10 @@ export default function BusinessTab() {
 
             const aptos = getAptosClient();
             if (brandProfileCreated) {
+              toast({
+                title: "Updating Brand Profile 1/2",
+                description: "Waiting to Approve Transacttion...",
+              });
               const updateBrandProfileTx = await signAndSubmitTransaction({
                 sender: account.address,
                 data: {
@@ -240,9 +246,16 @@ export default function BusinessTab() {
               const executedTransaction = await aptos.waitForTransaction({
                 transactionHash: updateBrandProfileTx.hash,
               });
-
+              toast({
+                title: "Updating Brand Profile 2/2",
+                description: "Brand Profile Updated.",
+              });
               console.log(executedTransaction);
             } else {
+              toast({
+                title: "Creating Brand Profile 1/2",
+                description: "Waiting to Approve Transacttion...",
+              });
               const createBrandProfileTx = await signAndSubmitTransaction({
                 sender: account.address,
                 data: {
@@ -260,7 +273,10 @@ export default function BusinessTab() {
               const executedTransaction = await aptos.waitForTransaction({
                 transactionHash: createBrandProfileTx.hash,
               });
-
+              toast({
+                title: "Creating Brand Profile 2/2",
+                description: "Brand Profile Created.",
+              });
               console.log(executedTransaction);
             }
           }}

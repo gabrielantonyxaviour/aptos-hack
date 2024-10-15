@@ -12,6 +12,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import uploadToWalrus from "@/lib/walrus/upload";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
+import { useRouter } from "next/navigation";
 
 export default function CreatePage() {
   const [image, setImage] = useState<File | null>(null);
@@ -23,6 +24,7 @@ export default function CreatePage() {
   const [isPromotion, setIsPromotion] = useState<boolean>(false);
   const [selectedPromotion, setSelectedPromotion] = useState<number>(0);
   const { account, signAndSubmitTransaction } = useWallet();
+  const router = useRouter();
   const promotions = [
     {
       id: 1,
@@ -194,14 +196,34 @@ export default function CreatePage() {
           <div className="flex justify-center py-4">
             <Button
               className="font-bold text-lg "
+              disabled={
+                image == null ||
+                account == undefined ||
+                postStatus == "" ||
+                caption == ""
+              }
               onClick={async () => {
-                if (image == null || account == undefined) {
+                if (
+                  image == null ||
+                  account == undefined ||
+                  postStatus == "" ||
+                  caption == ""
+                ) {
                   console.log(image);
                   console.log(account);
                   console.log("Image or Accont is null");
+                  toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "Please fill all the fields",
+                  });
                   return;
                 }
-                let blob = "8TABojg6drQTZB2C_LwdMnW4aPOSFIFLdu_SbzvCTek";
+                let blob = "";
+                toast({
+                  title: "Creating Post 1/3",
+                  description: "Uploading post to Walrus...",
+                });
                 if (blob == "") {
                   await uploadToWalrus(
                     image,
@@ -216,17 +238,22 @@ export default function CreatePage() {
                   );
                 }
                 const aptos = getAptosClient();
-
+                toast({
+                  title: "Creating Post 2/3",
+                  description: "Sending transaction to create post...",
+                });
                 const createPostTx = await signAndSubmitTransaction({
                   sender: account.address,
                   data: {
                     function: `${CORE_MODULE}::SocialMediaPlatform::create_post`,
                     functionArguments: [
                       blob,
-                      // Array.from(new TextEncoder().encode(caption)),
                       Array.from(new TextEncoder().encode(postStatus)),
+                      Array.from(new TextEncoder().encode(caption)),
                       isPromotion,
-                      "0x0000000000000000000000000000000000000000000000000000000000000000", // TODO: Need to remove hardcoding
+                      isPromotion
+                        ? "0x0000000000000000000000000000000000000000000000000000000000000000"
+                        : null, // TODO: Need to remove hardcoding
                     ],
                     typeArguments: [],
                   },
@@ -235,8 +262,12 @@ export default function CreatePage() {
                 const executedTransaction = await aptos.waitForTransaction({
                   transactionHash: createPostTx.hash,
                 });
-
+                toast({
+                  title: "Creating Post 3/3",
+                  description: "Post Created Successfully.",
+                });
                 console.log(executedTransaction);
+                router.push("/home");
               }}
             >
               Confirm

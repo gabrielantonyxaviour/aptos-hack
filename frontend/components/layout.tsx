@@ -10,9 +10,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { account } = useWallet();
   const router = useRouter();
   const pathName = usePathname();
-  const { updateProfile, setHasProfile, setHasPosts } = useEnvironmentStore(
-    (store) => store
-  );
+  const {
+    updateProfile,
+    setHasProfile,
+    setHasPosts,
+    updateBrand,
+    updatePosts,
+  } = useEnvironmentStore((store) => store);
   useEffect(() => {
     if (account == undefined) {
       router.push("/");
@@ -56,17 +60,50 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
           // FETCH POSTS
           const posts = (resources as any[]).filter(
-            (r) => r.type === `${CORE_MODULE}::SocialMediaPlatform::Post`
+            (r) => r.type === `${CORE_MODULE}::SocialMediaPlatform::UserPosts`
           );
           if (posts != undefined && posts.length > 0) {
             console.log(posts);
             console.log("Posts found");
+            const allPosts = posts[0].data.posts;
+            const formattedPosts = [];
+            for (let i = 0; i < allPosts.length; i++) {
+              formattedPosts.push({
+                id: i,
+                caption: hexToString(allPosts[i].caption.slice(2)),
+                comments: allPosts[i].comments,
+                image: hexToString(allPosts[i].content_hash.slice(2)),
+                creator: allPosts[i].creator,
+                status: hexToString(allPosts[i].status.slice(2)),
+                isPromotional: allPosts[i].is_promotional,
+                likes: allPosts[i].likes,
+                promotedProfile: allPosts[i].is_promotional
+                  ? allPosts[i].promoted_profile
+                  : "0x",
+              });
+            }
+            updatePosts({ posts: formattedPosts });
             setHasPosts(1);
-
-            // // updatePosts({})
           } else {
             setHasPosts(2);
             console.log("Posts not found");
+          }
+          const brandProfile = (resources as any[]).find(
+            (r) =>
+              r.type === `${CORE_MODULE}::SocialMediaPlatform::BrandProfile`
+          );
+          if (brandProfile != undefined) {
+            console.log("Brand Profile found");
+            updateBrand({
+              description: hexToString(
+                brandProfile.data.collab_description.slice(2)
+              ),
+              minBerries: parseInt(brandProfile.data.min_berries_required, 16),
+              minRewards: parseInt(brandProfile.data.min_rewards, 16),
+              maxRewards: parseInt(brandProfile.data.max_rewards, 16),
+            });
+          } else {
+            console.log("Brand Profile not found");
           }
         } catch (e) {
           console.log(e);
