@@ -1,7 +1,9 @@
 # Gabriel
 
+### Actions
+
 1. Create Account - DONE
-2. Create post
+2. Create post - DONE
 3. Create comment
 4. Follow
 5. Like
@@ -18,3 +20,7 @@
 5. Approved promotions
 6. Profile information
 7. Fetch posts by user.
+
+## UI
+
+1. Show transaction status as steps

@@ -9,13 +9,20 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import uploadToWalrus from "@/lib/walrus/upload";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
+
 export default function CreatePage() {
-  const [image, setImage] = useState<string | null>(null);
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageCid, setImageCid] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [postStatus, setPostStatus] = useState<string>("");
   const [caption, setCaption] = useState<string>("");
   const [isPromotion, setIsPromotion] = useState<boolean>(false);
   const [selectedPromotion, setSelectedPromotion] = useState<number>(0);
+  const { account, signAndSubmitTransaction } = useWallet();
   const promotions = [
     {
       id: 1,
@@ -42,19 +49,25 @@ export default function CreatePage() {
         <p className="text-xl font-semibold text-center">Create Post</p>
         <ScrollArea className="h-[90vh] mt-4 w-full">
           <div className="flex justify-center py-6 ">
-            {image != null ? (
+            {image != null && imagePreview != null ? (
               <div className="relative group">
                 <Image
-                  src={image}
+                  src={imagePreview}
                   alt="uploaded"
                   width={500}
                   height={500}
                   className="cursor-pointer rounded-lg transition-opacity duration-300 ease-in-out group-hover:opacity-50"
-                  onClick={() => setImage(null)}
+                  onClick={() => {
+                    setImage(null);
+                    setImagePreview(null);
+                  }}
                 />
                 <div
                   className="cursor-pointer absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2  rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out"
-                  onClick={() => setImage(null)}
+                  onClick={() => {
+                    setImage(null);
+                    setImagePreview(null);
+                  }}
                 >
                   <Trash className="w-8 h-8 " />
                 </div>
@@ -81,14 +94,16 @@ export default function CreatePage() {
                           description: "File size exceeds 2MB",
                         });
                         setImage(null);
+                        setImagePreview(null);
                         return;
                       }
 
                       const reader = new FileReader();
                       reader.onloadend = () => {
-                        setImage(reader.result as string); // Convert the file to a base64 string
+                        setImagePreview(reader.result as string); // Convert the file to a base64 string
                         setError(null);
                       };
+                      setImage(file);
                       reader.readAsDataURL(file); // Read the file as a data URL
                     }
                   }}
@@ -177,7 +192,55 @@ export default function CreatePage() {
             )}
           </div>
           <div className="flex justify-center py-4">
-            <Button className="font-bold text-lg ">Confirm</Button>
+            <Button
+              className="font-bold text-lg"
+              onClick={async () => {
+                if (image == null || account == undefined) {
+                  console.log(image);
+                  console.log(account);
+                  console.log("Image or Accont is null");
+                  return;
+                }
+                let blob = "8TABojg6drQTZB2C_LwdMnW4aPOSFIFLdu_SbzvCTek";
+                if (blob == "") {
+                  await uploadToWalrus(
+                    image,
+                    (blobId) => {
+                      blob = blobId;
+                      console.log(blobId);
+                      setImageCid(blobId);
+                    },
+                    (error) => {
+                      console.log(error);
+                    }
+                  );
+                }
+                const aptos = getAptosClient();
+
+                const createPostTx = await signAndSubmitTransaction({
+                  sender: account.address,
+                  data: {
+                    function: `${CORE_MODULE}::SocialMediaPlatform::create_post`,
+                    functionArguments: [
+                      blob,
+                      // Array.from(new TextEncoder().encode(caption)),
+                      Array.from(new TextEncoder().encode(postStatus)),
+                      isPromotion,
+                      "0x0000000000000000000000000000000000000000000000000000000000000000", // TODO: Need to remove hardcoding
+                    ],
+                    typeArguments: [],
+                  },
+                });
+                console.log(createPostTx);
+                const executedTransaction = await aptos.waitForTransaction({
+                  transactionHash: createPostTx.hash,
+                });
+
+                console.log(executedTransaction);
+              }}
+            >
+              Confirm
+            </Button>
           </div>
           <ScrollBar
             orientation="vertical"

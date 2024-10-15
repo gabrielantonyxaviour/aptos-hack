@@ -249,55 +249,55 @@ export default function NewUser() {
               variant={"default"}
               className="font-bold text-md p-6"
               onClick={async () => {
-                if (image == null || account == undefined) {
-                  console.log(image);
-                  console.log(account);
-                  console.log("Image or Accont is null");
-                  return;
-                }
+                // if (image == null || account == undefined) {
+                //   console.log(image);
+                //   console.log(account);
+                //   console.log("Image or Accont is null");
+                //   return;
+                // }
 
-                // Upload the image to Walrus
-                let blob = "iYNRDh_9hD5hC_qPOOe4zToXbKYu4QRulWwG4j48uik";
-                if (blob == "") {
-                  uploadToWalrus(
-                    image,
-                    (blobId) => {
-                      blob = blobId;
-                      setImageCid(blobId);
-                    },
-                    (error) => {
-                      console.log(error);
-                    }
-                  );
-                }
+                // // Upload the image to Walrus
+                // let blob = "iYNRDh_9hD5hC_qPOOe4zToXbKYu4QRulWwG4j48uik";
+                // if (blob == "") {
+                //   await uploadToWalrus(
+                //     image,
+                //     (blobId) => {
+                //       blob = blobId;
+                //       setImageCid(blobId);
+                //     },
+                //     (error) => {
+                //       console.log(error);
+                //     }
+                //   );
+                // }
 
-                // TODO: Send a transaction to create a new user
-                // TODO: Update zustand state
-                const aptos = getAptosClient();
+                // // TODO: Send a transaction to create a new user
+                // // TODO: Update zustand state
+                // const aptos = getAptosClient();
 
-                const createProfileTx = await signAndSubmitTransaction({
-                  sender: account.address,
-                  data: {
-                    function: `${CORE_MODULE}::SocialMediaPlatform::create_profile`,
-                    functionArguments: [
-                      Array.from(new TextEncoder().encode(username)),
-                      Array.from(new TextEncoder().encode(name)),
-                      Array.from(new TextEncoder().encode(bio)),
-                      blob,
-                      preferences,
-                      niches,
-                    ],
-                    typeArguments: [],
-                  },
-                });
-                console.log(createProfileTx);
-                const executedTransaction = await aptos.waitForTransaction({
-                  transactionHash: createProfileTx.hash,
-                });
+                // const createProfileTx = await signAndSubmitTransaction({
+                //   sender: account.address,
+                //   data: {
+                //     function: `${CORE_MODULE}::SocialMediaPlatform::create_profile`,
+                //     functionArguments: [
+                //       Array.from(new TextEncoder().encode(username)),
+                //       Array.from(new TextEncoder().encode(name)),
+                //       Array.from(new TextEncoder().encode(bio)),
+                //       blob,
+                //       preferences,
+                //       niches,
+                //     ],
+                //     typeArguments: [],
+                //   },
+                // });
+                // console.log(createProfileTx);
+                // const executedTransaction = await aptos.waitForTransaction({
+                //   transactionHash: createProfileTx.hash,
+                // });
 
-                console.log(executedTransaction);
+                // console.log(executedTransaction);
 
-                // router.push("/home");
+                router.push("/home");
               }}
             >
               Get Started
