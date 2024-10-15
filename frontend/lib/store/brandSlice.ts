@@ -1,7 +1,7 @@
 import { StateCreator } from "zustand";
 
 interface BrandState {
-  description: string;
+  brandDescription: string;
   minBerries: number;
   minRewards: number;
   maxRewards: number;
@@ -14,7 +14,7 @@ interface BrandActions {
 export type BrandSlice = BrandState & BrandActions;
 
 export const initalBrandState: BrandState = {
-  description: "",
+  brandDescription: "",
   minBerries: 0,
   minRewards: 0,
   maxRewards: 0,

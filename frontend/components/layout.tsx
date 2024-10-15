@@ -95,7 +95,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           if (brandProfile != undefined) {
             console.log("Brand Profile found");
             updateBrand({
-              description: hexToString(
+              brandDescription: hexToString(
                 brandProfile.data.collab_description.slice(2)
               ),
               minBerries: parseInt(brandProfile.data.min_berries_required, 16),

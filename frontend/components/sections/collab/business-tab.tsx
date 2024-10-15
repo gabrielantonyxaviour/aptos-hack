@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
-import { formattedNumber } from "@/lib/utils";
+import { availableCatgegories, formattedNumber } from "@/lib/utils";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -15,12 +15,36 @@ import { useEffect, useState } from "react";
 export default function BusinessTab() {
   const router = useRouter();
   const { toast } = useToast();
+
+  const { account, signAndSubmitTransaction } = useWallet();
+  const {
+    brandDescription,
+    minBerries,
+    minRewards,
+    maxRewards,
+    username,
+    name,
+    followers,
+    following,
+    bio,
+    image,
+    niches,
+  } = useEnvironmentStore((store) => store);
+
   const [adDesc, setAdDesc] = useState<string>("");
-  const [minBerries, setMinBerries] = useState<string>("0");
+  const [minBerriesLocal, setMinBerriesLocal] = useState<string>("0");
   const [minAptos, setMinAptos] = useState<string>("1,000");
   const [maxAptos, setMaxAptos] = useState<string>("10,000");
-  const preferences = ["Travel", "Fashion", "Music", "Food & Drink", "Gaming"];
-  const { account, signAndSubmitTransaction } = useWallet();
+  const [brandProfileCreated, setBrandProfileCreated] =
+    useState<boolean>(false);
+
+  useEffect(() => {
+    setBrandProfileCreated(brandDescription != "");
+    setAdDesc(brandDescription);
+    setMinBerriesLocal(minBerries.toLocaleString());
+    setMinAptos(minRewards.toLocaleString());
+    setMaxAptos(maxRewards.toLocaleString());
+  }, [brandDescription, minBerries, minRewards, maxRewards]);
 
   const influencers = [
     {
@@ -50,11 +74,6 @@ export default function BusinessTab() {
       niches: ["Travel", "Fashion", "Music", "Food & Drink", "Gaming"],
     },
   ];
-  useEffect(() => {}, [minAptos, maxAptos]);
-  const { username, name, followers, following, bio, image } =
-    useEnvironmentStore((store) => store);
-
-  const brandProfileCreated = false;
 
   return (
     <div className="flex flex-col space-y-4 w-full pr-4 py-4">
@@ -76,9 +95,9 @@ export default function BusinessTab() {
           <p className="font-semibold pt-4">{name}</p>
           <p className=" text-sm">{bio}</p>
           <div className="flex space-x-2">
-            {preferences.map((p, idx) => (
+            {niches.map((p, idx) => (
               <Badge key={idx} className="m-0">
-                {p}
+                {availableCatgegories[p]}
               </Badge>
             ))}
           </div>
@@ -106,24 +125,24 @@ export default function BusinessTab() {
               max={10000000}
               step={1000}
               className="w-full"
-              value={[parseFloat(minBerries.replace(/,/g, ""))]}
+              value={[parseFloat(minBerriesLocal.replace(/,/g, ""))]}
               onValueChange={([value]) => {
-                setMinBerries(value.toLocaleString());
+                setMinBerriesLocal(value.toLocaleString());
               }}
             />
             <div className="flex items-center space-x-2">
               <Image src={"/logo.png"} width={20} height={20} alt="aptos" />
               <Input
-                value={minBerries}
+                value={minBerriesLocal}
                 className="bg-accent text-md"
                 onChange={(e) => {
                   const value = parseFloat(e.target.value.replace(/,/g, ""));
                   if (isNaN(value) || value < 0) {
-                    setMinBerries("0");
+                    setMinBerriesLocal("0");
                   } else if (value > 1_000_000_000) {
-                    setMinBerries("1,000,000,000");
+                    setMinBerriesLocal("1,000,000,000");
                   } else {
-                    setMinBerries(value.toLocaleString());
+                    setMinBerriesLocal(value.toLocaleString());
                   }
                 }}
               />
@@ -235,7 +254,7 @@ export default function BusinessTab() {
                   function: `${CORE_MODULE}::SocialMediaPlatform::update_brand_profile`,
                   functionArguments: [
                     Array.from(new TextEncoder().encode(adDesc)),
-                    parseInt(minBerries.replace(/,/g, "")),
+                    parseInt(minBerriesLocal.replace(/,/g, "")),
                     parseInt(minAptos.replace(/,/g, "")),
                     parseInt(maxAptos.replace(/,/g, "")),
                   ],
@@ -262,7 +281,7 @@ export default function BusinessTab() {
                   function: `${CORE_MODULE}::SocialMediaPlatform::create_brand_profile`,
                   functionArguments: [
                     Array.from(new TextEncoder().encode(adDesc)),
-                    parseInt(minBerries.replace(/,/g, "")),
+                    parseInt(minBerriesLocal.replace(/,/g, "")),
                     parseInt(minAptos.replace(/,/g, "")),
                     parseInt(maxAptos.replace(/,/g, "")),
                   ],
