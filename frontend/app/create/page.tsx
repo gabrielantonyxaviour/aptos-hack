@@ -193,7 +193,7 @@ export default function CreatePage() {
           </div>
           <div className="flex justify-center py-4">
             <Button
-              className="font-bold text-lg"
+              className="font-bold text-lg "
               onClick={async () => {
                 if (image == null || account == undefined) {
                   console.log(image);
