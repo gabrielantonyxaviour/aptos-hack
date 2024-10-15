@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Query
 import requests
-import json
 
 app = FastAPI()
 
@@ -20,30 +19,17 @@ def get_user_posts(account_address: str = Query(..., alias="AccountAddress")):
     if response.status_code == 200:
         response_data = response.json()
 
-        # Extract the "UserPosts" data
-        user_posts = None
+        # Instead of filtering for specific "UserPosts", return all resources
+        all_resources = []
+        
         for resource in response_data:
-            if "SocialMedia::UserPosts" in resource["type"]:
-                user_posts = resource["data"]["posts"]
+            # Append each resource to the list
+            all_resources.append({
+                "type": resource["type"],
+                "data": resource["data"]
+            })
 
-        # Format the output to match your desired structure
-        if user_posts:
-            formatted_data = {
-                "posts": []
-            }
-            for i, post in enumerate(user_posts):
-                formatted_data["posts"].append({
-                    "comments": post["comments"],
-                    "content_hash": post["content_hash"],
-                    "creator": post["creator"],
-                    "is_promotional": post["is_promotional"],
-                    "like_count": post["like_count"],
-                    "promoted_profile": post["promoted_profile"]
-                })
-            
-            return formatted_data
-        else:
-            return {"message": "No user posts found."}
+        # Return the entire resources list
+        return {"resources": all_resources}
     else:
         return {"error": "Failed to fetch data from Aptos API"}
-
