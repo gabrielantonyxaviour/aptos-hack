@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import WalletInfo from "@/components/ui/custom/wallet-info";
 import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import uploadToWalrus from "@/lib/walrus/upload";
 
 export default function NewUser() {
   const [image, setImage] = useState<File | null>(null);
@@ -258,31 +259,16 @@ export default function NewUser() {
                 // Upload the image to Walrus
                 let blob = "iYNRDh_9hD5hC_qPOOe4zToXbKYu4QRulWwG4j48uik";
                 if (blob == "") {
-                  try {
-                    const epochs = 5;
-                    const force = true;
-                    const response = await fetch(
-                      `https://publisher-devnet.walrus.space/v1/store?epochs=${epochs}&force=${force}`,
-                      {
-                        method: "PUT",
-                        headers: {
-                          "Content-Type": "application/octet-stream",
-                        },
-                        body: image,
-                      }
-                    );
-
-                    if (!response.ok) {
-                      throw new Error(
-                        `Failed to upload image: ${response.statusText}`
-                      );
+                  uploadToWalrus(
+                    image,
+                    (blobId) => {
+                      blob = blobId;
+                      setImageCid(blobId);
+                    },
+                    (error) => {
+                      console.log(error);
                     }
-                    const responseData = await response.json();
-                    blob = responseData.newlyCreated.blobObject.blobId;
-                    setImageCid(responseData.newlyCreated.blobObject.blobId);
-                  } catch (error) {
-                    console.error(error);
-                  }
+                  );
                 }
 
                 // TODO: Send a transaction to create a new user

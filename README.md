@@ -1,6 +1,6 @@
 # Gabriel
 
-1. Create Account
+1. Create Account - DONE
 2. Create post
 3. Create comment
 4. Follow
