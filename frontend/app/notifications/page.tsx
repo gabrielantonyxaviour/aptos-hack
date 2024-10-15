@@ -3,6 +3,7 @@ import SideBar from "@/components/sections/side-nav";
 import WalletInfo from "@/components/ui/custom/wallet-info";
 import Notification from "@/components/sections/notifications/notification";
 import { Separator } from "@/components/ui/separator";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 export default function NotificationsPage() {
   const notifications = [
     {
@@ -52,15 +53,18 @@ export default function NotificationsPage() {
             <WalletInfo />
           </div>
           <Separator className="my-4" />
-          {notifications.map((not, idx) => (
-            <Notification
-              key={idx}
-              type={not.type}
-              user={not.user.name}
-              image={not.ref.image}
-              url={not.ref.url}
-            />
-          ))}
+          <ScrollArea className="h-[90vh] mt-4 w-full">
+            {notifications.map((not, idx) => (
+              <Notification
+                key={idx}
+                type={not.type}
+                user={not.user.name}
+                image={not.ref.image}
+                url={not.ref.url}
+              />
+            ))}
+            <ScrollBar orientation="vertical" className="ml-4 border-r-card" />
+          </ScrollArea>
         </div>
       </div>
     </div>

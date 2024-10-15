@@ -16,7 +16,7 @@ export default function SuggestedProfile({
   return (
     <div className="flex justify-between ">
       <div
-        className="flex items-center  space-x-3 py-2 hover:scale-110 cursor-pointer"
+        className="flex items-center  space-x-3 py-2 hover:scale-110 cursor-pointer transition ease-in-out duration-150"
         onClick={() => {
           // TODO: navigate to user profile
         }}

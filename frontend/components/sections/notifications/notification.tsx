@@ -16,7 +16,7 @@ export default function Notifcation({
   const router = useRouter();
   return (
     <div
-      className="flex justify-between cursor-pointer hover:scale-105 hover:translate-x-2 transition duration-100 ease-in-out"
+      className="flex justify-between cursor-pointer hover:scale-105 hover:translate-x-2 transition duration-100 ease-in-out px-4 py-2"
       onClick={() => {
         router.push(url);
       }}

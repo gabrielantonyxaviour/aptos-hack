@@ -9,10 +9,10 @@ export default function Post({ params }: { params: { id: string } }) {
       <SideBar />
       <div className="pt-7 px-7 flex-1 flex justify-center">
         <div className="w-[40%]">
-          <PostPage />
+          <PostPage postId={parseInt(params.id)} />
         </div>
         <div className="w-[40%]">
-          <Comments />
+          <Comments postId={parseInt(params.id)} />
         </div>
       </div>
     </div>

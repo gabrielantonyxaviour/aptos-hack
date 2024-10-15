@@ -38,7 +38,7 @@ export default function HomePage() {
     <div className="flex h-screen">
       <SideBar />
       <div className="pt-7 px-7 flex-1 flex justify-center space-x-12">
-        <div className=" w-[40%]">
+        <div className="max-w-[1000px]">
           <Tabs defaultValue="suggested">
             <div className=" flex justify-between w-full">
               <p className="font-semibold text-lg">Your Feed</p>
@@ -51,7 +51,7 @@ export default function HomePage() {
                 </TabsTrigger>
               </TabsList>
             </div>
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center w-full">
               <ScrollArea className="h-[90vh] mt-4 w-full">
                 <Post />
                 <Post />

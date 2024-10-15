@@ -1,14 +1,23 @@
 "use client";
 import SideBar from "@/components/sections/side-nav";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Post from "@/components/ui/custom/post";
 import WalletInfo from "@/components/ui/custom/wallet-info";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { Check, Plus, X } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
 
 export default function ProfilePage() {
   const preferences = ["Travel", "Fashion", "Music", "Food & Drink", "Gaming"];
+  const isYourProfile = false;
+  const isFollowing = false;
+  const { account, signAndSubmitTransaction } = useWallet();
+  const [hoveringUnfollow, setHoveringUnfollow] = useState<boolean>(false);
   return (
     <div className="flex h-screen select-none">
       <SideBar />
@@ -26,7 +35,84 @@ export default function ProfilePage() {
               <div className="flex flex-col flex-1 space-y-2">
                 <div className="flex justify-between items-center">
                   <p className="text-lg font-semibold">gabrielaxy.aptos</p>
-                  <WalletInfo />
+                  {isYourProfile ? (
+                    <WalletInfo />
+                  ) : (
+                    <Button
+                      variant={"secondary"}
+                      className={`flex space-x-2 ${
+                        isFollowing
+                          ? "hover:bg-destructive transition ease-in-out duration-400 hover:scale-105"
+                          : "hover:bg-primary hover:text-black transition ease-in-out duration-400 hover:scale-105"
+                      } `}
+                      onMouseEnter={() => setHoveringUnfollow(true)}
+                      onMouseLeave={() => setHoveringUnfollow(false)}
+                      onClick={async () => {
+                        if (account == undefined) return;
+
+                        const aptos = getAptosClient();
+                        if (isFollowing) {
+                          const unfollowProfileTx =
+                            await signAndSubmitTransaction({
+                              sender: account.address,
+                              data: {
+                                function: `${CORE_MODULE}::SocialMediaPlatform::unfollow_user`,
+                                functionArguments: [
+                                  "0x2df1944b5fcffc2a53d2c75d4a86be38c1ab7cb32bba9db38f7141385786969a", // TODO: Remove hardcoding
+                                ],
+                                typeArguments: [],
+                              },
+                            });
+                          console.log(unfollowProfileTx);
+                          const executedTransaction =
+                            await aptos.waitForTransaction({
+                              transactionHash: unfollowProfileTx.hash,
+                            });
+
+                          console.log(executedTransaction);
+                        } else {
+                          const followProfileTx =
+                            await signAndSubmitTransaction({
+                              sender: account.address,
+                              data: {
+                                function: `${CORE_MODULE}::SocialMediaPlatform::follow_user`,
+                                functionArguments: [
+                                  "0x2df1944b5fcffc2a53d2c75d4a86be38c1ab7cb32bba9db38f7141385786969a", // TODO: Remove hardcoding
+                                  "gabrielaxy", // TODO: Remove hardcoding
+                                ],
+                                typeArguments: [],
+                              },
+                            });
+                          console.log(followProfileTx);
+                          const executedTransaction =
+                            await aptos.waitForTransaction({
+                              transactionHash: followProfileTx.hash,
+                            });
+
+                          console.log(executedTransaction);
+                        }
+                      }}
+                    >
+                      {isFollowing ? (
+                        hoveringUnfollow ? (
+                          <>
+                            <X className="w-4 h-4" />
+                            <p className="font-semibold">Unfollow</p>
+                          </>
+                        ) : (
+                          <>
+                            <Check className="w-4 h-4" />
+                            <p className="font-semibold">Following</p>
+                          </>
+                        )
+                      ) : (
+                        <>
+                          <Plus className="w-4 h-4" />
+                          <p className="font-semibold">Follow</p>
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </div>
                 <div className="flex justify-start space-x-16 pt-4">
                   <p className="text-md font-semibold">1 post</p>
