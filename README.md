@@ -6,10 +6,13 @@
 2. Create post - DONE
 3. Create comment - DONE
 4. Follow - DONE
-5. Like -
-6. Create promotion -
-7. Apply for promotion
-8. Add WorldID Verification
+5. Unfollow - DONE
+6. Like - DONE
+7. Create promotion -
+8. Update promotion -
+9. Apply for promotion -
+10. Accept promotion - DITCHED
+11. Add WorldID Verification
 
 ### Fetch
 
@@ -24,3 +27,6 @@
 ## UI
 
 1. Show transaction status as steps
+2. Double click like
+3. Like animation
+4. Change Dummy images to actual images

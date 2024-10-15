@@ -13,8 +13,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { BarChart, Heart, MessageCircle, UserMinusIcon } from "lucide-react";
-import { Input } from "@/components/ui/input";
-export default function PostPage() {
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
+
+export default function PostPage({ postId }: { postId: number }) {
+  const isLiked = false; // TODO: Remove hardcoding
+  const { account, signAndSubmitTransaction } = useWallet();
   return (
     <Card className="mb-4 mr-4 h-[90vh]">
       <CardHeader className="p-3 m-0">
@@ -62,7 +66,37 @@ export default function PostPage() {
         </div>
         <div className="flex space-x-4 p-3 text-muted-foreground">
           <div className="flex space-x-1 items-center">
-            <Heart className="h-5 w-5 fill-red-500 text-red-500" />
+            <Heart
+              className={`h-5 w-5 ${
+                isLiked
+                  ? "fill-red-500 text-red-500"
+                  : "hover:fill-red-300 hover:text-red-300 transition duration-50 ease-in-out hover:scale-110"
+              }  cursor-pointer`}
+              onClick={async () => {
+                if (account == undefined) return;
+
+                if (!isLiked) {
+                  const aptos = getAptosClient();
+                  const likePostTx = await signAndSubmitTransaction({
+                    sender: account.address,
+                    data: {
+                      function: `${CORE_MODULE}::SocialMediaPlatform::like_post`,
+                      functionArguments: [
+                        "0x2df1944b5fcffc2a53d2c75d4a86be38c1ab7cb32bba9db38f7141385786969a", // TODO: remove hardcooing
+                        postId,
+                      ],
+                      typeArguments: [],
+                    },
+                  });
+                  console.log(likePostTx);
+                  const executedTransaction = await aptos.waitForTransaction({
+                    transactionHash: likePostTx.hash,
+                  });
+
+                  console.log(executedTransaction);
+                }
+              }}
+            />
             <p className="text-sm">100</p>
           </div>
           <div className="flex space-x-1 items-center">
