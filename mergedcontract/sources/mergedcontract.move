@@ -1,7 +1,7 @@
-module mergedcontract::SocialMediaPlatform {
+module approval::SocialMediaPlatform {
     use std::signer;
     use std::vector;
-    use std::option::{Self, Option};
+    use std::option::Option;
     use aptos_std::table::{Self, Table};
 
     // User Profile Structs
@@ -14,6 +14,9 @@ module mergedcontract::SocialMediaPlatform {
         niche: vector<u8>,
         following_count: u64,
         followers_count: u64,
+        worldcoin_nullifier_hash: vector<u8>,
+        total_likes: u64,
+        total_comments: u64,
     }
 
     struct SocialConnections has key {
@@ -25,7 +28,8 @@ module mergedcontract::SocialMediaPlatform {
     struct Post has store {
         creator: address,
         content_hash: vector<u8>,
-        status: vector<u8>,  // Added status field
+        status: vector<u8>,
+        caption: vector<u8>,
         is_promotional: bool,
         promoted_profile: Option<address>,
         like_count: u64,
@@ -50,6 +54,11 @@ module mergedcontract::SocialMediaPlatform {
         is_active: bool,
     }
 
+    struct CollaborationApplications has key {
+        applicants: vector<address>,
+        approved_applicants: Table<address, bool>,
+    }
+
     // Constants
     const MAX_PREFERENCES: u64 = 5;
     const MAX_NICHE: u64 = 5;
@@ -64,6 +73,8 @@ module mergedcontract::SocialMediaPlatform {
     const BRAND_PROFILE_ALREADY_EXISTS: u64 = 7;
     const BRAND_PROFILE_DOES_NOT_EXIST: u64 = 8;
     const POST_INDEX_INVALID: u64 = 9;
+    const NOT_BRAND_OWNER: u64 = 10;
+    const USER_NOT_APPLIED: u64 = 11;
 
     // Create a user profile
     public entry fun create_profile(
@@ -73,7 +84,8 @@ module mergedcontract::SocialMediaPlatform {
         bio: vector<u8>,
         profile_pic_cid: vector<u8>,
         preferences: vector<u8>,
-        niche: vector<u8>
+        niche: vector<u8>,
+        worldcoin_nullifier_hash: vector<u8>
     ) {
         let account_address = signer::address_of(account);
         assert!(!exists<Profile>(account_address), PROFILE_ALREADY_EXISTS);
@@ -89,6 +101,9 @@ module mergedcontract::SocialMediaPlatform {
             niche,
             following_count: 0,
             followers_count: 0,
+            worldcoin_nullifier_hash,
+            total_likes: 0,
+            total_comments: 0,
         };
         move_to(account, profile);
 
@@ -178,6 +193,7 @@ module mergedcontract::SocialMediaPlatform {
         creator: &signer,
         content_hash: vector<u8>,
         status: vector<u8>,
+        caption: vector<u8>,
         is_promotional: bool,
         promoted_profile: Option<address>,
     ) acquires UserPosts {
@@ -186,6 +202,7 @@ module mergedcontract::SocialMediaPlatform {
             creator: creator_address,
             content_hash,
             status,
+            caption,
             is_promotional,
             promoted_profile,
             like_count: 0,
@@ -205,12 +222,16 @@ module mergedcontract::SocialMediaPlatform {
         _user: &signer, 
         post_creator: address, 
         post_index: u64
-    ) acquires UserPosts {
+    ) acquires UserPosts, Profile {
         let user_posts = borrow_global_mut<UserPosts>(post_creator);
         assert!(post_index < vector::length(&user_posts.posts), POST_INDEX_INVALID);
         
         let post = vector::borrow_mut(&mut user_posts.posts, post_index);
         post.like_count = post.like_count + 1;
+
+        // Update the creator's total likes
+        let creator_profile = borrow_global_mut<Profile>(post_creator);
+        creator_profile.total_likes = creator_profile.total_likes + 1;
     }
 
     // Comment on a post
@@ -219,7 +240,7 @@ module mergedcontract::SocialMediaPlatform {
         post_creator: address,
         post_index: u64,
         comment_content: vector<u8>
-    ) acquires UserPosts {
+    ) acquires UserPosts, Profile {
         let user_posts = borrow_global_mut<UserPosts>(post_creator);
         assert!(post_index < vector::length(&user_posts.posts), POST_INDEX_INVALID);
         
@@ -230,6 +251,10 @@ module mergedcontract::SocialMediaPlatform {
         
         let post = vector::borrow_mut(&mut user_posts.posts, post_index);
         vector::push_back(&mut post.comments, comment);
+
+        // Update the creator's total comments
+        let creator_profile = borrow_global_mut<Profile>(post_creator);
+        creator_profile.total_comments = creator_profile.total_comments + 1;
     }
 
     // Create brand profile
@@ -251,6 +276,12 @@ module mergedcontract::SocialMediaPlatform {
             is_active: true,
         };
         move_to(account, brand_profile);
+
+        // Also create the CollaborationApplications resource with an empty Table for approved applicants
+        move_to(account, CollaborationApplications {
+            applicants: vector::empty(),
+            approved_applicants: table::new(),
+        });
     }
 
     // Update brand profile
@@ -280,6 +311,54 @@ module mergedcontract::SocialMediaPlatform {
         brand_profile.is_active = !brand_profile.is_active;
     }
 
+    // Apply to a brand's collaboration post
+    public entry fun apply_to_brand_collaboration(
+        applicant: &signer,
+        brand_address: address
+    ) acquires CollaborationApplications {
+        assert!(exists<BrandProfile>(brand_address), BRAND_PROFILE_DOES_NOT_EXIST);
+        assert!(exists<CollaborationApplications>(brand_address), BRAND_PROFILE_DOES_NOT_EXIST);
+        
+        let applicant_address = signer::address_of(applicant);
+
+        let applications = borrow_global_mut<CollaborationApplications>(brand_address);
+        if (!vector::contains(&applications.applicants, &applicant_address)) {
+            vector::push_back(&mut applications.applicants, applicant_address);
+        };
+        
+        if (!table::contains(&applications.approved_applicants, applicant_address)) {
+            table::add(&mut applications.approved_applicants, applicant_address, false);
+        };
+    }
+
+    // New: Approve applicants for collaboration
+    public entry fun approve_applicants(
+        brand: &signer,
+        approved_addresses: vector<address>
+    ) acquires CollaborationApplications {
+        let brand_address = signer::address_of(brand);
+        assert!(exists<BrandProfile>(brand_address), BRAND_PROFILE_DOES_NOT_EXIST);
+        
+        let applications = borrow_global_mut<CollaborationApplications>(brand_address);
+        
+        let i = 0;
+        while (i < vector::length(&approved_addresses)) {
+            let applicant = *vector::borrow(&approved_addresses, i);
+            assert!(vector::contains(&applications.applicants, &applicant), USER_NOT_APPLIED);
+            table::upsert(&mut applications.approved_applicants, applicant, true);
+            i = i + 1;
+        };
+    }
+
+    // New: Check if user is approved for collaboration
+    public fun is_approved_for_collab(brand_address: address, user_address: address): bool acquires CollaborationApplications {
+        assert!(exists<CollaborationApplications>(brand_address), BRAND_PROFILE_DOES_NOT_EXIST);
+        
+        let applications = borrow_global<CollaborationApplications>(brand_address);
+        table::contains(&applications.approved_applicants, user_address) &&
+        *table::borrow(&applications.approved_applicants, user_address)
+    }
+
     // View Functions
     #[view]
     public fun get_profile(account_address: address): (
@@ -289,6 +368,8 @@ module mergedcontract::SocialMediaPlatform {
         vector<u8>,
         vector<u8>,
         vector<u8>,
+        u64,
+        u64,
         u64,
         u64
     ) acquires Profile {
@@ -302,7 +383,9 @@ module mergedcontract::SocialMediaPlatform {
             profile.preferences,
             profile.niche,
             profile.following_count,
-            profile.followers_count
+            profile.followers_count,
+            profile.total_likes,
+            profile.total_comments
         )
     }
 
@@ -342,4 +425,31 @@ module mergedcontract::SocialMediaPlatform {
         let user_posts = borrow_global<UserPosts>(user_address);
         vector::length(&user_posts.posts)
     }
+
+    #[view]
+    public fun get_collaboration_applicants(brand_address: address): vector<address> acquires CollaborationApplications {
+        assert!(exists<CollaborationApplications>(brand_address), BRAND_PROFILE_DOES_NOT_EXIST);
+        let applications = borrow_global<CollaborationApplications>(brand_address);
+        applications.applicants
+    }
+
+
+    #[view]
+    public fun get_approved_applicants(brand_address: address): vector<address> acquires CollaborationApplications {
+        assert!(exists<CollaborationApplications>(brand_address), BRAND_PROFILE_DOES_NOT_EXIST);
+        let applications = borrow_global<CollaborationApplications>(brand_address);
+        
+        let approved = vector::empty();
+        let i = 0;
+        while (i < vector::length(&applications.applicants)) {
+            let applicant = *vector::borrow(&applications.applicants, i);
+            if (table::contains(&applications.approved_applicants, applicant) &&
+                *table::borrow(&applications.approved_applicants, applicant)) {
+                vector::push_back(&mut approved, applicant);
+            };
+            i = i + 1;
+        };
+        approved
+    }
+
 }
