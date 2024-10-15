@@ -1,9 +1,10 @@
 module approval::SocialMediaPlatform {
     use std::signer;
     use std::vector;
+    use std::string::{Self, String};
     use std::option::Option;
     use aptos_std::table::{Self, Table};
-
+    use aptos_std::simple_map::{Self, SimpleMap};
     // User Profile Structs
     struct Profile has key {
         user_name: vector<u8>,
@@ -23,6 +24,34 @@ module approval::SocialMediaPlatform {
         following: Table<address, vector<u8>>,
         followers: Table<address, vector<u8>>,
     }
+    struct ComprehensiveData has key {
+        posts: SimpleMap<address, vector<PostData>>,
+        brand_profiles: SimpleMap<address, BrandProfileData>,
+        applications: SimpleMap<address, vector<address>>,
+    }
+    struct PostData has store, copy, drop {
+       content_hash: vector<u8>,
+        status: vector<u8>,
+        caption: vector<u8>,
+        is_promotional: bool,
+        promoted_profile: Option<address>,
+        like_count: u64,
+        comments: vector<CommentData>,
+    }
+
+    struct CommentData has store, copy, drop {
+        commenter: address,
+        content: vector<u8>,
+    }
+
+    struct BrandProfileData has store, drop, copy {
+        collab_description: vector<u8>,
+        min_berries_required: u64,
+        min_rewards: u64,
+        max_rewards: u64,
+        is_active: bool,
+    }
+
 
     // Post Related Structs
     struct Post has store {
@@ -33,7 +62,7 @@ module approval::SocialMediaPlatform {
         is_promotional: bool,
         promoted_profile: Option<address>,
         like_count: u64,
-        comments: vector<Comment>,
+        comments: vector<CommentData>,
     }
 
     struct Comment has copy, drop, store {
@@ -59,6 +88,11 @@ module approval::SocialMediaPlatform {
         approved_applicants: Table<address, bool>,
     }
 
+    // New struct to store existing usernames
+    struct UsernameRegistry has key {
+        usernames: Table<String, bool>,
+    }
+
     // Constants
     const MAX_PREFERENCES: u64 = 5;
     const MAX_NICHE: u64 = 5;
@@ -75,6 +109,56 @@ module approval::SocialMediaPlatform {
     const POST_INDEX_INVALID: u64 = 9;
     const NOT_BRAND_OWNER: u64 = 10;
     const USER_NOT_APPLIED: u64 = 11;
+    const USERNAME_ALREADY_EXISTS: u64 = 12;
+
+    fun init_module(account: &signer) {
+    move_to(account, UsernameRegistry {
+        usernames: table::new(),
+        // Assuming init_comprehensive_data is a function you want to call separately
+    });
+    init_comprehensive_data(account); // Call this function outside of the struct initialization
+}
+    fun update_post_data(creator: address, post: &Post) acquires ComprehensiveData {
+        let comprehensive_data = borrow_global_mut<ComprehensiveData>(@approval);
+        let post_data = PostData {
+            content_hash: *&post.content_hash,
+            status: *&post.status,
+            caption: *&post.caption,
+            is_promotional: post.is_promotional,
+            promoted_profile: *&post.promoted_profile,
+            like_count: post.like_count,
+            comments: *&post.comments,
+        };
+        if (!simple_map::contains_key(&comprehensive_data.posts, &creator)) {
+            simple_map::add(&mut comprehensive_data.posts, creator, vector::empty());
+        };
+        let user_posts = simple_map::borrow_mut(&mut comprehensive_data.posts, &creator);
+        vector::push_back(user_posts, post_data);
+    }
+
+    // Function to initialize the ComprehensiveData resource
+    fun init_comprehensive_data(account: &signer) {
+        if (!exists<ComprehensiveData>(@approval)) {
+            move_to(account, ComprehensiveData {
+                posts: simple_map::create(),
+                brand_profiles: simple_map::create(),
+                applications: simple_map::create(),
+            });
+        };
+    }
+
+
+    // Helper function to check if a username exists
+    fun username_exists(username: &String): bool acquires UsernameRegistry {
+        let registry = borrow_global<UsernameRegistry>(@approval);
+        table::contains(&registry.usernames, *username)
+    }
+
+    // Helper function to register a username
+    fun register_username(username: String) acquires UsernameRegistry {
+        let registry = borrow_global_mut<UsernameRegistry>(@approval);
+        table::add(&mut registry.usernames, username, true);
+    }
 
     // Create a user profile
     public entry fun create_profile(
@@ -86,11 +170,14 @@ module approval::SocialMediaPlatform {
         preferences: vector<u8>,
         niche: vector<u8>,
         worldcoin_nullifier_hash: vector<u8>
-    ) {
+    ) acquires UsernameRegistry {
         let account_address = signer::address_of(account);
         assert!(!exists<Profile>(account_address), PROFILE_ALREADY_EXISTS);
         assert!(vector::length(&preferences) <= MAX_PREFERENCES, MAX_PREFERENCES_EXCEEDED);
         assert!(vector::length(&niche) <= MAX_NICHE, MAX_NICHE_EXCEEDED);
+
+        let username_string = string::utf8(user_name);
+        assert!(!username_exists(&username_string), USERNAME_ALREADY_EXISTS);
 
         let profile = Profile {
             user_name,
@@ -112,6 +199,8 @@ module approval::SocialMediaPlatform {
             followers: table::new(),
         };
         move_to(account, social_connections);
+
+        register_username(username_string);
     }
 
     // Update profile
@@ -123,7 +212,7 @@ module approval::SocialMediaPlatform {
         profile_pic_cid: vector<u8>,
         preferences: vector<u8>,
         niche: vector<u8>
-    ) acquires Profile {
+    ) acquires Profile, UsernameRegistry {
         let account_address = signer::address_of(account);
         assert!(exists<Profile>(account_address), PROFILE_DOES_NOT_EXIST);
         
@@ -131,6 +220,19 @@ module approval::SocialMediaPlatform {
         assert!(vector::length(&niche) <= MAX_NICHE, MAX_NICHE_EXCEEDED);
         
         let profile = borrow_global_mut<Profile>(account_address);
+        let new_username_string = string::utf8(user_name);
+        let old_username_string = string::utf8(profile.user_name);
+
+        // Check if the new username is different from the old one and not already taken
+        if (!compare_strings(&old_username_string, &new_username_string)) {
+           assert!(!username_exists(&new_username_string), USERNAME_ALREADY_EXISTS);
+        
+           // Unregister old username and register new one
+           let registry = borrow_global_mut<UsernameRegistry>(@approval);
+           table::remove(&mut registry.usernames, old_username_string);
+           table::add(&mut registry.usernames, new_username_string, true);
+    };
+
         profile.user_name = user_name;
         profile.display_name = display_name;
         profile.bio = bio;
@@ -196,7 +298,7 @@ module approval::SocialMediaPlatform {
         caption: vector<u8>,
         is_promotional: bool,
         promoted_profile: Option<address>,
-    ) acquires UserPosts {
+    ) acquires UserPosts, ComprehensiveData {
         let creator_address = signer::address_of(creator);
         let post = Post {
             creator: creator_address,
@@ -215,6 +317,9 @@ module approval::SocialMediaPlatform {
 
         let user_posts = borrow_global_mut<UserPosts>(creator_address);
         vector::push_back(&mut user_posts.posts, post);
+
+        // Update ComprehensiveData
+        update_post_data(creator_address, vector::borrow(&user_posts.posts, vector::length(&user_posts.posts) - 1));
     }
 
     // Like a post
@@ -222,7 +327,11 @@ module approval::SocialMediaPlatform {
         _user: &signer, 
         post_creator: address, 
         post_index: u64
-    ) acquires UserPosts, Profile {
+    ) acquires UserPosts, Profile, ComprehensiveData {
+        let comprehensive_data = borrow_global_mut<ComprehensiveData>(@approval);
+        let user_posts = simple_map::borrow_mut(&mut comprehensive_data.posts, &post_creator);
+        let post_data = vector::borrow_mut(user_posts, post_index);
+        post_data.like_count = post_data.like_count + 1;
         let user_posts = borrow_global_mut<UserPosts>(post_creator);
         assert!(post_index < vector::length(&user_posts.posts), POST_INDEX_INVALID);
         
@@ -240,21 +349,30 @@ module approval::SocialMediaPlatform {
         post_creator: address,
         post_index: u64,
         comment_content: vector<u8>
-    ) acquires UserPosts, Profile {
+    ) acquires UserPosts, Profile, ComprehensiveData {
         let user_posts = borrow_global_mut<UserPosts>(post_creator);
         assert!(post_index < vector::length(&user_posts.posts), POST_INDEX_INVALID);
         
-        let comment = Comment {
+        let comment = CommentData {
             commenter: signer::address_of(commenter),
             content: comment_content,
+        
         };
         
         let post = vector::borrow_mut(&mut user_posts.posts, post_index);
         vector::push_back(&mut post.comments, comment);
+        let comprehensive_data = borrow_global_mut<ComprehensiveData>(@approval);
+        let user_posts = simple_map::borrow_mut(&mut comprehensive_data.posts, &post_creator);
+        let post_data = vector::borrow_mut(user_posts, post_index);
+        vector::push_back(&mut post_data.comments, CommentData {
+            commenter: signer::address_of(commenter),
+            content: comment_content,
+        });
 
         // Update the creator's total comments
         let creator_profile = borrow_global_mut<Profile>(post_creator);
         creator_profile.total_comments = creator_profile.total_comments + 1;
+        
     }
 
     // Create brand profile
@@ -264,8 +382,16 @@ module approval::SocialMediaPlatform {
         min_berries_required: u64,
         min_rewards: u64,
         max_rewards: u64
-    ) {
+    ) acquires ComprehensiveData {
         let account_address = signer::address_of(account);
+        let comprehensive_data = borrow_global_mut<ComprehensiveData>(@approval);
+        simple_map::add(&mut comprehensive_data.brand_profiles, account_address, BrandProfileData {
+            collab_description,
+            min_berries_required,
+            min_rewards,
+            max_rewards,
+            is_active: true,
+        });
         assert!(!exists<BrandProfile>(account_address), BRAND_PROFILE_ALREADY_EXISTS);
 
         let brand_profile = BrandProfile {
@@ -291,8 +417,10 @@ module approval::SocialMediaPlatform {
         min_berries_required: u64,
         min_rewards: u64,
         max_rewards: u64
-    ) acquires BrandProfile {
+    ) acquires BrandProfile, ComprehensiveData {
         let account_address = signer::address_of(account);
+        let comprehensive_data = borrow_global_mut<ComprehensiveData>(@approval);
+        let brand_profile_data = simple_map::borrow_mut(&mut comprehensive_data.brand_profiles, &account_address);
         assert!(exists<BrandProfile>(account_address), BRAND_PROFILE_DOES_NOT_EXIST);
         
         let brand_profile = borrow_global_mut<BrandProfile>(account_address);
@@ -303,8 +431,10 @@ module approval::SocialMediaPlatform {
     }
 
     // Toggle brand profile active status
-    public entry fun toggle_brand_status(account: &signer) acquires BrandProfile {
+    public entry fun toggle_brand_status(account: &signer) acquires BrandProfile, ComprehensiveData {
         let account_address = signer::address_of(account);
+        let comprehensive_data = borrow_global_mut<ComprehensiveData>(@approval);
+        let brand_profile_data = simple_map::borrow_mut(&mut comprehensive_data.brand_profiles, &account_address);
         assert!(exists<BrandProfile>(account_address), BRAND_PROFILE_DOES_NOT_EXIST);
         
         let brand_profile = borrow_global_mut<BrandProfile>(account_address);
@@ -315,11 +445,16 @@ module approval::SocialMediaPlatform {
     public entry fun apply_to_brand_collaboration(
         applicant: &signer,
         brand_address: address
-    ) acquires CollaborationApplications {
+    ) acquires CollaborationApplications, ComprehensiveData {
         assert!(exists<BrandProfile>(brand_address), BRAND_PROFILE_DOES_NOT_EXIST);
         assert!(exists<CollaborationApplications>(brand_address), BRAND_PROFILE_DOES_NOT_EXIST);
         
         let applicant_address = signer::address_of(applicant);
+        let comprehensive_data = borrow_global_mut<ComprehensiveData>(@approval);
+        if (!simple_map::contains_key(&comprehensive_data.applications, &brand_address)) {
+            simple_map::add(&mut comprehensive_data.applications, brand_address, vector::empty());
+        };
+        let applicants = simple_map::borrow_mut(&mut comprehensive_data.applications, &brand_address);
 
         let applications = borrow_global_mut<CollaborationApplications>(brand_address);
         if (!vector::contains(&applications.applicants, &applicant_address)) {
@@ -359,6 +494,25 @@ module approval::SocialMediaPlatform {
         *table::borrow(&applications.approved_applicants, user_address)
     }
 
+    // Helper function to compare two strings
+    fun compare_strings(a: &String, b: &String): bool {
+        let a_bytes = string::bytes(a);
+        let b_bytes = string::bytes(b);
+        if (vector::length(a_bytes) != vector::length(b_bytes)) {
+            false
+        } else {
+            let i = 0;
+            let len = vector::length(a_bytes);
+            while (i < len) {
+                if (*vector::borrow(a_bytes, i) != *vector::borrow(b_bytes, i)) {
+                    return false
+                };
+                i = i + 1;
+            };
+            true
+        }
+    }
+
     // View Functions
     #[view]
     public fun get_profile(account_address: address): (
@@ -387,6 +541,41 @@ module approval::SocialMediaPlatform {
             profile.total_likes,
             profile.total_comments
         )
+    }
+    #[view]
+    public fun get_user_posts(user_address: address): vector<PostData> acquires ComprehensiveData {
+        let comprehensive_data = borrow_global<ComprehensiveData>(@approval);
+        if (simple_map::contains_key(&comprehensive_data.posts, &user_address)) {
+            *simple_map::borrow(&comprehensive_data.posts, &user_address)
+        } else {
+            vector::empty<PostData>()
+        }
+    }
+
+    #[view]
+    public fun get_post_data(user_address: address, post_index: u64): PostData acquires ComprehensiveData {
+        let comprehensive_data = borrow_global<ComprehensiveData>(@approval);
+        assert!(simple_map::contains_key(&comprehensive_data.posts, &user_address), PROFILE_DOES_NOT_EXIST);
+        let user_posts = simple_map::borrow(&comprehensive_data.posts, &user_address);
+        assert!(post_index < vector::length(user_posts), POST_INDEX_INVALID);
+        *vector::borrow(user_posts, post_index)
+    }
+
+    #[view]
+    public fun get_brand_profile_data(brand_address: address): BrandProfileData acquires ComprehensiveData {
+        let comprehensive_data = borrow_global<ComprehensiveData>(@approval);
+        assert!(simple_map::contains_key(&comprehensive_data.brand_profiles, &brand_address), BRAND_PROFILE_DOES_NOT_EXIST);
+        *simple_map::borrow(&comprehensive_data.brand_profiles, &brand_address)
+    }
+
+    #[view]
+    public fun get_brand_applicants(brand_address: address): vector<address> acquires ComprehensiveData {
+        let comprehensive_data = borrow_global<ComprehensiveData>(@approval);
+        if (simple_map::contains_key(&comprehensive_data.applications, &brand_address)) {
+            *simple_map::borrow(&comprehensive_data.applications, &brand_address)
+        } else {
+            vector::empty()
+        }
     }
 
     #[view]
@@ -432,24 +621,4 @@ module approval::SocialMediaPlatform {
         let applications = borrow_global<CollaborationApplications>(brand_address);
         applications.applicants
     }
-
-
-    #[view]
-    public fun get_approved_applicants(brand_address: address): vector<address> acquires CollaborationApplications {
-        assert!(exists<CollaborationApplications>(brand_address), BRAND_PROFILE_DOES_NOT_EXIST);
-        let applications = borrow_global<CollaborationApplications>(brand_address);
-        
-        let approved = vector::empty();
-        let i = 0;
-        while (i < vector::length(&applications.applicants)) {
-            let applicant = *vector::borrow(&applications.applicants, i);
-            if (table::contains(&applications.approved_applicants, applicant) &&
-                *table::borrow(&applications.approved_applicants, applicant)) {
-                vector::push_back(&mut approved, applicant);
-            };
-            i = i + 1;
-        };
-        approved
-    }
-
 }
