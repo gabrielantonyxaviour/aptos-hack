@@ -12,7 +12,7 @@ export default function Post({ params }: { params: { id: string } }) {
           <PostPage />
         </div>
         <div className="w-[40%]">
-          <Comments />
+          <Comments postId={parseInt(params.id)} />
         </div>
       </div>
     </div>
