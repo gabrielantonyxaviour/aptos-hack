@@ -25,13 +25,13 @@ export function hexToString(hex: string): string {
   }
   return result;
 }
-export function hexToNumberArray(hex: string): string[] {
-  const result: string[] = [];
+export function hexToNumberArray(hex: string): number[] {
+  const result: number[] = [];
 
   for (let i = 0; i < hex.length; i += 2) {
     const hexByte = hex.substring(i, i + 2);
     const num = parseInt(hexByte, 16); // Convert hex to decimal
-    result.push(num.toString());
+    result.push(num);
   }
 
   return result;

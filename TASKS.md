@@ -19,9 +19,8 @@
 2. Fetch post with comment
 3. All promotions
 4. All applications
-5. Approved promotions
-6. Profile information
-7. Fetch posts by user.
+5. Profile information - DONE
+6. Fetch posts by user - DONE
 
 ## UI
 
