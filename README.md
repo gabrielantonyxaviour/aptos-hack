@@ -7,6 +7,7 @@
 5. Like
 6. Create promotion
 7. Apply for promotion
+8. Add WorldID Verification
 
 ### Fetch
 

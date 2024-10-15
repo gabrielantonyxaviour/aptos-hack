@@ -10,17 +10,22 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useRouter } from "next/navigation";
 import WalletInfo from "@/components/ui/custom/wallet-info";
+import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
+
 export default function NewUser() {
-  const [image, setImage] = useState<string | null>(null);
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageCid, setImageCid] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const [name, setName] = useState<string>("");
   const [username, setUsername] = useState<string>("");
   const [bio, setBio] = useState<string>("");
-  const [niches, setNiches] = useState<string[]>([]);
-  const [preferences, setPreferences] = useState<string[]>([]);
+  const [niches, setNiches] = useState<number[]>([]);
+  const [preferences, setPreferences] = useState<number[]>([]);
   const { toast } = useToast();
-
+  const { account, signAndSubmitTransaction } = useWallet();
   const router = useRouter();
   const availableCatgegories = [
     "Technology",
@@ -65,19 +70,25 @@ export default function NewUser() {
       <ScrollArea className="h-[80vh] ">
         <div className="flex w-full flex-col justify-center space-y-6 pr-4">
           <div className="flex justify-center">
-            {image != null ? (
+            {imagePreview != null && image != null ? (
               <div className="relative group">
                 <Image
-                  src={image}
+                  src={imagePreview}
                   alt="uploaded"
                   width={200}
                   height={200}
                   className="cursor-pointer rounded-lg transition-opacity duration-300 ease-in-out group-hover:opacity-50"
-                  onClick={() => setImage(null)}
+                  onClick={() => {
+                    setImage(null);
+                    setImagePreview(null);
+                  }}
                 />
                 <div
                   className="cursor-pointer absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2  rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out"
-                  onClick={() => setImage(null)}
+                  onClick={() => {
+                    setImage(null);
+                    setImagePreview(null);
+                  }}
                 >
                   <Trash className="w-8 h-8 " />
                 </div>
@@ -104,14 +115,15 @@ export default function NewUser() {
                           description: "File size exceeds 2MB",
                         });
                         setImage(null);
+                        setImagePreview(null);
                         return;
                       }
-
                       const reader = new FileReader();
                       reader.onloadend = () => {
-                        setImage(reader.result as string); // Convert the file to a base64 string
+                        setImagePreview(reader.result as string); // Convert the file to a base64 string
                         setError(null);
                       };
+                      setImage(file);
                       reader.readAsDataURL(file); // Read the file as a data URL
                     }
                   }}
@@ -175,7 +187,7 @@ export default function NewUser() {
                 <Badge
                   key={idx}
                   className={`m-1 cursor-pointer text-sm ${
-                    niches.includes(category)
+                    niches.includes(idx)
                       ? "bg-primary"
                       : `bg-secondary ${
                           niches.length >= 5
@@ -184,10 +196,10 @@ export default function NewUser() {
                         }`
                   }`}
                   onClick={() => {
-                    if (niches.includes(category)) {
-                      setNiches(niches.filter((n) => n !== category));
+                    if (niches.includes(idx)) {
+                      setNiches(niches.filter((n, id) => n !== idx));
                     } else {
-                      setNiches([...niches, category]);
+                      setNiches([...niches, idx]);
                     }
                   }}
                 >
@@ -206,7 +218,7 @@ export default function NewUser() {
                 <Badge
                   key={idx}
                   className={`m-1 cursor-pointer text-sm ${
-                    preferences.includes(category)
+                    preferences.includes(idx)
                       ? "bg-primary"
                       : `, bg-secondary ${
                           preferences.length >= 5
@@ -215,10 +227,10 @@ export default function NewUser() {
                         }`
                   }`}
                   onClick={() => {
-                    if (preferences.includes(category)) {
-                      setPreferences(preferences.filter((n) => n !== category));
+                    if (preferences.includes(idx)) {
+                      setPreferences(preferences.filter((n) => n !== idx));
                     } else {
-                      setPreferences([...preferences, category]);
+                      setPreferences([...preferences, idx]);
                     }
                   }}
                 >
@@ -230,15 +242,76 @@ export default function NewUser() {
               Choose the type of content you want to see on your feed.
             </p>
           </div>
+
           <div className="flex justify-end pb-4">
             <Button
               variant={"default"}
               className="font-bold text-md p-6"
-              onClick={() => {
-                // TODO: Store image to ipfs
+              onClick={async () => {
+                if (image == null || account == undefined) {
+                  console.log(image);
+                  console.log(account);
+                  console.log("Image or Accont is null");
+                  return;
+                }
+
+                // Upload the image to Walrus
+                let blob = "iYNRDh_9hD5hC_qPOOe4zToXbKYu4QRulWwG4j48uik";
+                if (blob == "") {
+                  try {
+                    const epochs = 5;
+                    const force = true;
+                    const response = await fetch(
+                      `https://publisher-devnet.walrus.space/v1/store?epochs=${epochs}&force=${force}`,
+                      {
+                        method: "PUT",
+                        headers: {
+                          "Content-Type": "application/octet-stream",
+                        },
+                        body: image,
+                      }
+                    );
+
+                    if (!response.ok) {
+                      throw new Error(
+                        `Failed to upload image: ${response.statusText}`
+                      );
+                    }
+                    const responseData = await response.json();
+                    blob = responseData.newlyCreated.blobObject.blobId;
+                    setImageCid(responseData.newlyCreated.blobObject.blobId);
+                  } catch (error) {
+                    console.error(error);
+                  }
+                }
+
                 // TODO: Send a transaction to create a new user
                 // TODO: Update zustand state
-                router.push("/home");
+                const aptos = getAptosClient();
+
+                const createProfileTx = await signAndSubmitTransaction({
+                  sender: account.address,
+                  data: {
+                    function: `${CORE_MODULE}::SocialMediaPlatform::create_profile`,
+                    functionArguments: [
+                      Array.from(new TextEncoder().encode(username)),
+                      Array.from(new TextEncoder().encode(name)),
+                      Array.from(new TextEncoder().encode(bio)),
+                      blob,
+                      preferences,
+                      niches,
+                    ],
+                    typeArguments: [],
+                  },
+                });
+                console.log(createProfileTx);
+                const executedTransaction = await aptos.waitForTransaction({
+                  transactionHash: createProfileTx.hash,
+                });
+
+                console.log(executedTransaction);
+
+                // router.push("/home");
               }}
             >
               Get Started
