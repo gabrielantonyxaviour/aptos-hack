@@ -161,3 +161,7 @@ def fetch_and_calculate(account_address: str):
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the unified SocioBerries API"}
+# Entry point to run the app using Uvicorn
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
