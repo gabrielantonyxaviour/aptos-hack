@@ -2,16 +2,13 @@
 import { useEnvironmentStore } from "@/components/context";
 import SideBar from "@/components/sections/side-nav";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Post from "@/components/ui/custom/post";
 import WalletInfo from "@/components/ui/custom/wallet-info";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
 import { availableCatgegories } from "@/lib/utils";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { Check, Plus, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 

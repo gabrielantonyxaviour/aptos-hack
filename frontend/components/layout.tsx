@@ -186,6 +186,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       content: hexToString(c.content.slice(2)),
                     };
                   }),
+                  creator: post.value[0].creator,
                   image: hexToString(post.value[0].content_hash.slice(2)),
                   status: hexToString(post.value[0].status.slice(2)),
                   isPromotional: post.value[0].is_promotional,

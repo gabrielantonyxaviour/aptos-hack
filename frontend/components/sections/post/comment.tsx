@@ -2,6 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CORE_MODULE } from "@/lib/aptos";
 import { hexToString } from "@/lib/utils";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Comment({
@@ -12,6 +13,7 @@ export default function Comment({
   comment: any;
 }) {
   const [profile, setProfile] = useState<any>(null);
+  const router = useRouter();
   useEffect(() => {
     (async function () {
       try {
@@ -58,7 +60,7 @@ export default function Comment({
         <p
           className="text-white text-sm font-semibold hover:scale-105 hover:-translate-y-1 transition duration-100 ease-out cursor-pointer"
           onClick={() => {
-            // TODO: navigate to user profile
+            router.push(`/profile/${comment.commenter}`);
           }}
         >
           {profile.username} &nbsp;

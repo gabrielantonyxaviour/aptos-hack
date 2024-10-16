@@ -75,6 +75,8 @@ export default function Post({ key, post }: { key: number; post: PostType }) {
           <div
             className="flex items-center space-x-4 cursor-pointer"
             onClick={() => {
+              console.log("LOGGIN");
+              console.log(post);
               router.push(`/profile/${creator}`);
             }}
           >
