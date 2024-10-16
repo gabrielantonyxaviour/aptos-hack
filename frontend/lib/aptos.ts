@@ -18,6 +18,6 @@ export const getAptosClient = () => APTOS_CLIENT;
 export const getSurfClient = () => SURF_CLIENT;
 
 export const CORE_MODULE: string =
-  "0x5495429c793e23ab1ff7cf5c58ee9cedcfa18a050df4df599c843c952a91572e";
+  "0xa7cefd0de0671383e3bc1adc990dc91f039975beb57970cb513e607a5bc95cec";
 export const BERRIES_MODULE: string =
   "0xe2079a607cd4a25f6b8a711f9e6dcba29d60eb25df3c8af9ceeaefef1c224c9a";

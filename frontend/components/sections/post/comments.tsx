@@ -16,29 +16,17 @@ import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
-export default function Comments({ postId }: { postId: number }) {
-  const comments = [
-    {
-      id: 1,
-      profile: {
-        name: "Marshal",
-        username: "marshal.aptos",
-        image: "/onboarding/1.png",
-      },
-      content: "Giga Chad right here 🦍",
-    },
-    {
-      id: 2,
-      profile: {
-        name: "Tabitha",
-        username: "tabitha.aptos",
-        image: "/onboarding/2.jpg",
-      },
-      content: "👍🔥",
-    },
-  ];
+import { useEnvironmentStore } from "@/components/context";
+export default function Comments({
+  post,
+  profile,
+}: {
+  post: any;
+  profile: any;
+}) {
   const [comment, setComment] = useState<string>("");
   const { account, signAndSubmitTransaction } = useWallet();
+  const { image } = useEnvironmentStore((store) => store);
   return (
     <Card className="h-[90vh] flex flex-col">
       <CardHeader>
@@ -46,13 +34,8 @@ export default function Comments({ postId }: { postId: number }) {
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
         <ScrollArea className="h-[74vh]">
-          {comments.map((c, idx) => (
-            <Comment
-              key={idx}
-              username={c.profile.username}
-              image={c.profile.image}
-              content={c.content}
-            />
+          {post.comments.map((c: any, idx: number) => (
+            <Comment key={idx} comment={c} />
           ))}
           <ScrollBar orientation="vertical" />
         </ScrollArea>
@@ -60,7 +43,7 @@ export default function Comments({ postId }: { postId: number }) {
         <Separator className="my-2" />
         <div className="flex items-center">
           <Image
-            src={"/avatar.jpeg"}
+            src={`https://aggregator-devnet.walrus.space/v1/${image}`}
             width={30}
             height={30}
             alt="Avatar"
@@ -91,7 +74,7 @@ export default function Comments({ postId }: { postId: number }) {
                   function: `${CORE_MODULE}::SocialMediaPlatform::comment_on_post`,
                   functionArguments: [
                     "0x2df1944b5fcffc2a53d2c75d4a86be38c1ab7cb32bba9db38f7141385786969a", // TODO: Replace with actual post creator
-                    postId,
+                    post.id,
                     Array.from(new TextEncoder().encode(comment)),
                   ],
                   typeArguments: [],

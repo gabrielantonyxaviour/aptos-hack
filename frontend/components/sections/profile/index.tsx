@@ -1,37 +1,30 @@
 "use client";
-import { useEnvironmentStore } from "@/components/context";
 import SideBar from "@/components/sections/side-nav";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Post from "@/components/ui/custom/post";
-import WalletInfo from "@/components/ui/custom/wallet-info";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
+import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
 import { availableCatgegories } from "@/lib/utils";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { Check, Plus, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-export default function ProfilePage() {
-  const {
-    username,
-    image,
-    name,
-    followers,
-    following,
-    bio,
-    niches,
-    posts,
-    balance,
-  } = useEnvironmentStore((store) => store);
-  const { account } = useWallet();
-  const [profilePosts, setProfilePosts] = useState<any>(null);
+export default function Profile({ username }: { username: string }) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [name, setName] = useState("");
+  const [image, setImage] = useState("");
+  const [followers, setFollowers] = useState(0);
+  const [following, setFollowing] = useState(0);
+  const [bio, setBio] = useState("");
+  const [niches, setNiches] = useState<number[]>([]);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const { account, signAndSubmitTransaction } = useWallet();
+  const [hoveringUnfollow, setHoveringUnfollow] = useState<boolean>(false);
+  useEffect(() => {}, []);
 
-  useEffect(() => {
-    if (account == undefined) return;
-    console.log("ProfilePage");
-    setProfilePosts(posts.filter((p) => p.creator == account.address));
-  }, [account]);
   return (
     <div className="flex h-screen select-none">
       <SideBar />
@@ -49,7 +42,80 @@ export default function ProfilePage() {
               <div className="flex flex-col flex-1 space-y-2">
                 <div className="flex justify-between items-center">
                   <p className="text-lg font-semibold">{username}</p>
-                  <WalletInfo />
+
+                  <Button
+                    variant={"secondary"}
+                    className={`flex space-x-2 ${
+                      isFollowing
+                        ? "hover:bg-destructive transition ease-in-out duration-400 hover:scale-105"
+                        : "hover:bg-primary hover:text-black transition ease-in-out duration-400 hover:scale-105"
+                    } `}
+                    onMouseEnter={() => setHoveringUnfollow(true)}
+                    onMouseLeave={() => setHoveringUnfollow(false)}
+                    onClick={async () => {
+                      if (account == undefined) return;
+
+                      const aptos = getAptosClient();
+                      if (isFollowing) {
+                        const unfollowProfileTx =
+                          await signAndSubmitTransaction({
+                            sender: account.address,
+                            data: {
+                              function: `${CORE_MODULE}::SocialMediaPlatform::unfollow_user`,
+                              functionArguments: [
+                                "0x2df1944b5fcffc2a53d2c75d4a86be38c1ab7cb32bba9db38f7141385786969a", // TODO: Remove hardcoding
+                              ],
+                              typeArguments: [],
+                            },
+                          });
+                        console.log(unfollowProfileTx);
+                        const executedTransaction =
+                          await aptos.waitForTransaction({
+                            transactionHash: unfollowProfileTx.hash,
+                          });
+
+                        console.log(executedTransaction);
+                      } else {
+                        const followProfileTx = await signAndSubmitTransaction({
+                          sender: account.address,
+                          data: {
+                            function: `${CORE_MODULE}::SocialMediaPlatform::follow_user`,
+                            functionArguments: [
+                              "0x2df1944b5fcffc2a53d2c75d4a86be38c1ab7cb32bba9db38f7141385786969a", // TODO: Remove hardcoding
+                              "gabrielaxy", // TODO: Remove hardcoding
+                            ],
+                            typeArguments: [],
+                          },
+                        });
+                        console.log(followProfileTx);
+                        const executedTransaction =
+                          await aptos.waitForTransaction({
+                            transactionHash: followProfileTx.hash,
+                          });
+
+                        console.log(executedTransaction);
+                      }
+                    }}
+                  >
+                    {isFollowing ? (
+                      hoveringUnfollow ? (
+                        <>
+                          <X className="w-4 h-4" />
+                          <p className="font-semibold">Unfollow</p>
+                        </>
+                      ) : (
+                        <>
+                          <Check className="w-4 h-4" />
+                          <p className="font-semibold">Following</p>
+                        </>
+                      )
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4" />
+                        <p className="font-semibold">Follow</p>
+                      </>
+                    )}
+                  </Button>
                 </div>
                 <div className="flex justify-start space-x-16 pt-4">
                   <p className="text-md font-semibold">1 post</p>
@@ -58,9 +124,9 @@ export default function ProfilePage() {
                 </div>
                 <p className="font-semibold pt-4">{name}</p>
                 <p className=" text-sm">{bio}</p>
-                <div className="flex space-x-2 flex-wrap pb-2">
+                <div className="flex space-x-2">
                   {niches.map((p, idx) => (
-                    <Badge key={idx} className="m-0 my-0.5">
+                    <Badge key={idx} className="m-0">
                       {availableCatgegories[p]}
                     </Badge>
                   ))}
@@ -72,9 +138,7 @@ export default function ProfilePage() {
                 <CardContent className="p-0 m-0 flex flex-col justify-between items-center h-full">
                   <div></div>
                   <div className="flex items-center space-x-4  py-3">
-                    <p className="font-semibold text-lg">
-                      {(parseInt(balance) / 10 ** 8).toFixed(3).toString()}
-                    </p>
+                    <p className="font-semibold text-lg">1.45</p>
                     <Image
                       src="/aptos.png"
                       width={30}
@@ -144,19 +208,7 @@ export default function ProfilePage() {
               </Card>
             </div>
             <p className="text-center py-4 font-semibold text-lg">Posts</p>
-            {profilePosts != null ? (
-              profilePosts.map((p: any, idx: number) => (
-                <Post key={idx} post={p} />
-              ))
-            ) : (
-              <div className="flex flex-col items-center justify-center space-y-3">
-                <Skeleton className="h-[625px] w-[450px] rounded-xl" />
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-[250px]" />
-                  <Skeleton className="h-4 w-[200px]" />
-                </div>
-              </div>
-            )}
+            {}
             <ScrollBar className="ml-12" />
           </ScrollArea>
         </div>

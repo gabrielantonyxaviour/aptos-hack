@@ -1,39 +1,20 @@
 "use client";
 
+import { useEnvironmentStore } from "@/components/context";
 import SideBar from "@/components/sections/side-nav";
 import Post from "@/components/ui/custom/post";
 import Suggested from "@/components/ui/custom/suggested";
 import { ScrollBar, ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useEffect } from "react";
 
 export default function HomePage() {
-  const feed = [
-    {
-      id: 1,
-      name: "John Doe",
-      username: "@johndoe",
-      picture: "https://randomuser.me/api/portraits",
-      time: "2 hours ago",
-      post: "https://source.unsplash.com/random",
-      caption:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nib",
-      likes: 100,
-      comments: 20,
-    },
-    {
-      id: 2,
-      name: "Jane Doe",
-      username: "@janedoe",
-      picture: "https://randomuser.me/api/portraits",
-      time: "1 hour ago",
-      post: "https://source.unsplash.com/random",
-      caption:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nib",
-      likes: 200,
-      comments: 30,
-    },
-  ];
+  const { posts } = useEnvironmentStore((store) => store);
+  useEffect(() => {
+    console.log("POSTS OUTPUT");
+    console.log(posts);
+  }, [posts]);
   return (
     <div className="flex h-screen">
       <SideBar />
@@ -53,8 +34,9 @@ export default function HomePage() {
             </div>
             <div className="flex flex-col items-center w-full">
               <ScrollArea className="h-[90vh] mt-4 w-full">
-                <Post />
-                <Post />
+                {posts.map((post, idx) => (
+                  <Post key={idx} post={post} />
+                ))}
                 <ScrollBar
                   orientation="vertical"
                   className="ml-4 border-r-card"

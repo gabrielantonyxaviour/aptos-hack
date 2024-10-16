@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Trash } from "lucide-react";
+import { Check, Trash } from "lucide-react";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +13,13 @@ import WalletInfo from "@/components/ui/custom/wallet-info";
 import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import uploadToWalrus from "@/lib/walrus/upload";
+import {
+  IDKitWidget,
+  VerificationLevel,
+  ISuccessResult,
+} from "@worldcoin/idkit";
+import { availableCatgegories } from "@/lib/utils";
+import { useEnvironmentStore } from "@/components/context";
 
 export default function NewUser() {
   const [image, setImage] = useState<File | null>(null);
@@ -28,28 +35,10 @@ export default function NewUser() {
   const { toast } = useToast();
   const { account, signAndSubmitTransaction } = useWallet();
   const router = useRouter();
-  const availableCatgegories = [
-    "Technology",
-    "Health & Fitness",
-    "Travel",
-    "Fashion",
-    "Music",
-    "Food & Drink",
-    "Gaming",
-    "Movies & TV Shows",
-    "Business & Finance",
-    "Sports",
-    "Art & Design",
-    "Photography",
-    "Books & Literature",
-    "Science",
-    "Personal Development",
-    "Politics",
-    "Education",
-    "Lifestyle",
-    "Entrepreneurship",
-    "Environment",
-  ];
+
+  const { updateProfile } = useEnvironmentStore((store) => store);
+
+  const [nullifierHash, setNullifierHash] = useState("");
 
   return (
     <div className="mx-auto flex w-full flex-col justify-center space-y-6 ">
@@ -200,7 +189,7 @@ export default function NewUser() {
                     if (niches.includes(idx)) {
                       setNiches(niches.filter((n, id) => n !== idx));
                     } else {
-                      setNiches([...niches, idx]);
+                      if (niches.length < 5) setNiches([...niches, idx]);
                     }
                   }}
                 >
@@ -231,7 +220,8 @@ export default function NewUser() {
                     if (preferences.includes(idx)) {
                       setPreferences(preferences.filter((n) => n !== idx));
                     } else {
-                      setPreferences([...preferences, idx]);
+                      if (preferences.length < 5)
+                        setPreferences([...preferences, idx]);
                     }
                   }}
                 >
@@ -244,59 +234,150 @@ export default function NewUser() {
             </p>
           </div>
 
-          <div className="flex justify-end pb-4">
+          <div className="flex justify-end pb-4 space-x-2">
+            <IDKitWidget
+              app_id={
+                (process.env.NEXT_PUBLIC_WORLDCOIN_APP_ID as `app_${string}`) ||
+                "app_xxx"
+              }
+              action="verify-humanness"
+              onSuccess={(res: ISuccessResult) => {
+                console.log("PROOF OF HUMNITY SUCCESS");
+                console.log(res);
+                setNullifierHash(res.nullifier_hash);
+              }}
+              handleVerify={(res: ISuccessResult) => {
+                console.log("PROOF OF HUMNITY HANDLE GENERATED");
+                console.log(res);
+                setNullifierHash(res.nullifier_hash);
+              }}
+              verification_level={VerificationLevel.Orb}
+            >
+              {({ open }) => (
+                <Button
+                  className="p-6 flex space-x-2 items-center"
+                  variant={"outline"}
+                  onClick={() => {
+                    open();
+                  }}
+                  disabled={nullifierHash != ""}
+                >
+                  {nullifierHash != "" ? (
+                    <>
+                      <Check className="w-5 h-5" />
+                      <p className="font-semibold">Verified Human</p>
+                    </>
+                  ) : (
+                    <>
+                      <Image
+                        src={"/worldcoin.png"}
+                        width={25}
+                        height={25}
+                        alt="worldcoin"
+                        className="rounded-full"
+                      />
+                      <p className="font-semibold">Verify Humaness</p>
+                    </>
+                  )}
+                </Button>
+              )}
+            </IDKitWidget>
             <Button
               variant={"default"}
-              className="font-bold text-md p-6"
+              className="font-semibold text-md p-6"
+              disabled={
+                nullifierHash == "" ||
+                image == null ||
+                account == undefined ||
+                name == "" ||
+                username == "" ||
+                bio == "" ||
+                niches.length == 0 ||
+                preferences.length == 0
+              }
               onClick={async () => {
-                // if (image == null || account == undefined) {
-                //   console.log(image);
-                //   console.log(account);
-                //   console.log("Image or Accont is null");
-                //   return;
-                // }
+                if (
+                  nullifierHash == "" ||
+                  image == null ||
+                  account == undefined ||
+                  name == "" ||
+                  username == "" ||
+                  bio == "" ||
+                  niches.length == 0 ||
+                  preferences.length == 0
+                ) {
+                  console.log(image);
+                  console.log(account);
+                  console.log("Image or Accont is null");
+                  toast({
+                    title: "Error",
+                    description: "Please fill all the fields",
+                  });
+                  return;
+                }
 
                 // // Upload the image to Walrus
-                // let blob = "iYNRDh_9hD5hC_qPOOe4zToXbKYu4QRulWwG4j48uik";
-                // if (blob == "") {
-                //   await uploadToWalrus(
-                //     image,
-                //     (blobId) => {
-                //       blob = blobId;
-                //       setImageCid(blobId);
-                //     },
-                //     (error) => {
-                //       console.log(error);
-                //     }
-                //   );
-                // }
+                toast({
+                  title: "Creating Profile 1/3",
+                  description: "Uploading your profile to Walrus...",
+                });
+                let blob = "";
+                if (blob == "") {
+                  await uploadToWalrus(
+                    image,
+                    (blobId) => {
+                      blob = blobId;
+                      setImageCid(blobId);
+                    },
+                    (error) => {
+                      console.log(error);
+                    }
+                  );
+                }
 
-                // // TODO: Send a transaction to create a new user
-                // // TODO: Update zustand state
-                // const aptos = getAptosClient();
+                const aptos = getAptosClient();
+                toast({
+                  title: "Creating Profile 2/3",
+                  description: "Triggering transaction ...",
+                });
+                const createProfileTx = await signAndSubmitTransaction({
+                  sender: account.address,
+                  data: {
+                    function: `${CORE_MODULE}::SocialMediaPlatform::create_profile`,
+                    functionArguments: [
+                      Array.from(new TextEncoder().encode(username)),
+                      Array.from(new TextEncoder().encode(name)),
+                      Array.from(new TextEncoder().encode(bio)),
+                      blob,
+                      preferences,
+                      niches,
+                      nullifierHash,
+                    ],
+                    typeArguments: [],
+                  },
+                });
+                console.log(createProfileTx);
+                const executedTransaction = await aptos.waitForTransaction({
+                  transactionHash: createProfileTx.hash,
+                });
 
-                // const createProfileTx = await signAndSubmitTransaction({
-                //   sender: account.address,
-                //   data: {
-                //     function: `${CORE_MODULE}::SocialMediaPlatform::create_profile`,
-                //     functionArguments: [
-                //       Array.from(new TextEncoder().encode(username)),
-                //       Array.from(new TextEncoder().encode(name)),
-                //       Array.from(new TextEncoder().encode(bio)),
-                //       blob,
-                //       preferences,
-                //       niches,
-                //     ],
-                //     typeArguments: [],
-                //   },
-                // });
-                // console.log(createProfileTx);
-                // const executedTransaction = await aptos.waitForTransaction({
-                //   transactionHash: createProfileTx.hash,
-                // });
-
-                // console.log(executedTransaction);
-
+                console.log(executedTransaction);
+                toast({
+                  title: "Creating Profile 3/3",
+                  description: "Profile created Successfully.",
+                });
+                updateProfile({
+                  name: name,
+                  username: username,
+                  bio: bio,
+                  niches: niches,
+                  preferences: preferences,
+                  image: blob,
+                  followers: 0,
+                  following: 0,
+                  balance: "0",
+                  humanness_nullifier: nullifierHash,
+                });
                 router.push("/home");
               }}
             >

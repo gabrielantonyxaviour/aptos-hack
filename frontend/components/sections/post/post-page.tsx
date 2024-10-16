@@ -15,22 +15,43 @@ import {
 import { BarChart, Heart, MessageCircle, UserMinusIcon } from "lucide-react";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
+import { useEnvironmentStore } from "@/components/context";
+import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { hexToString } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
-export default function PostPage({ postId }: { postId: number }) {
+export default function PostPage({
+  post,
+  profile,
+}: {
+  post: any;
+  profile: any;
+}) {
   const isLiked = false; // TODO: Remove hardcoding
   const { account, signAndSubmitTransaction } = useWallet();
-  return (
+  const router = useRouter();
+
+  return post == null || profile == null ? (
+    <div className="flex flex-col space-y-3">
+      <Skeleton className="h-[625px] w-[450px] rounded-xl" />
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-[250px]" />
+        <Skeleton className="h-4 w-[200px]" />
+      </div>
+    </div>
+  ) : (
     <Card className="mb-4 mr-4 h-[90vh]">
       <CardHeader className="p-3 m-0">
         <div className="flex justify-between">
           <div
             className="flex items-center space-x-4 cursor-pointer"
             onClick={() => {
-              // TODO: Go to profile page
+              router.push(`/profile/${post.creator}`);
             }}
           >
             <Image
-              src={"/avatar.jpeg"}
+              src={`https://aggregator-devnet.walrus.space/v1/${profile.image}`}
               width={30}
               height={30}
               alt="Avatar"
@@ -38,9 +59,9 @@ export default function PostPage({ postId }: { postId: number }) {
             />
             <div className="flex flex-col">
               <p className="font-semibold hover:scale-105 hover:-translate-y-[1px] transition duration-150 ease-in-out">
-                gabrielaxy.aptos
+                {profile.username}
               </p>
-              <p className="text-xs text-muted-foreground">📍Singapore</p>
+              <p className="text-xs text-muted-foreground">{post.status}</p>
             </div>
           </div>
           <DropdownMenu>
@@ -62,7 +83,12 @@ export default function PostPage({ postId }: { postId: number }) {
       </CardHeader>
       <CardContent className="py-2 px-0 m-0 ">
         <div className="flex justify-center bg-card">
-          <Image src={"/post/hi.jpg"} width={500} height={500} alt="Post" />
+          <Image
+            src={`https://aggregator-devnet.walrus.space/v1/${post.image}`}
+            width={500}
+            height={500}
+            alt="Post"
+          />
         </div>
         <div className="flex space-x-4 p-3 text-muted-foreground">
           <div className="flex space-x-1 items-center">
@@ -83,7 +109,7 @@ export default function PostPage({ postId }: { postId: number }) {
                       function: `${CORE_MODULE}::SocialMediaPlatform::like_post`,
                       functionArguments: [
                         "0x2df1944b5fcffc2a53d2c75d4a86be38c1ab7cb32bba9db38f7141385786969a", // TODO: remove hardcooing
-                        postId,
+                        post.id,
                       ],
                       typeArguments: [],
                     },
@@ -97,11 +123,13 @@ export default function PostPage({ postId }: { postId: number }) {
                 }
               }}
             />
-            <p className="text-sm">100</p>
+            <p className="text-sm">
+              {(post.likes == undefined ? 0 : post.likes).toString()}
+            </p>
           </div>
           <div className="flex space-x-1 items-center">
             <MessageCircle className="h-5 w-5" />
-            <p className="text-sm">100</p>
+            <p className="text-sm">{post.comments.length}</p>
           </div>
           <TooltipProvider>
             <Tooltip delayDuration={50}>
@@ -112,14 +140,14 @@ export default function PostPage({ postId }: { postId: number }) {
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Coming Soon</p>
+                <p>ing Soon</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
         <p className="font-semibold px-3">
-          gabrielaxy.aptos &nbsp;
-          <span className="text-sm font-medium">too cool for this app</span>
+          {post.username} &nbsp;
+          <span className="text-sm font-medium">{post.caption}</span>
         </p>
       </CardContent>
     </Card>
