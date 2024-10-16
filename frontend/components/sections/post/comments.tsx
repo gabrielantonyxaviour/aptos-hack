@@ -24,26 +24,6 @@ export default function Comments({
   post: any;
   profile: any;
 }) {
-  const comments = [
-    {
-      id: 1,
-      profile: {
-        name: "Marshal",
-        username: "marshal.aptos",
-        image: "/onboarding/1.png",
-      },
-      content: "Giga Chad right here 🦍",
-    },
-    {
-      id: 2,
-      profile: {
-        name: "Tabitha",
-        username: "tabitha.aptos",
-        image: "/onboarding/2.jpg",
-      },
-      content: "👍🔥",
-    },
-  ];
   const [comment, setComment] = useState<string>("");
   const { account, signAndSubmitTransaction } = useWallet();
   const { image } = useEnvironmentStore((store) => store);

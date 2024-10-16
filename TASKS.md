@@ -31,7 +31,6 @@
 
 ## FINAL
 
-3. Fetch posts + comment
 4. Fetch applications
 5. Test All contract calls
 6. Migrate to new contracts and feed correct values

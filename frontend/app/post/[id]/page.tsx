@@ -41,12 +41,18 @@ export default function Post({ params }: { params: { id: string } }) {
     <div className="flex h-screen">
       <SideBar />
       <div className="pt-7 px-7 flex-1 flex justify-center">
-        <div className="w-[40%]">
-          <PostPage post={post} profile={profile} />
-        </div>
-        <div className="w-[40%]">
-          <Comments post={post} profile={profile} />
-        </div>
+        {post == null || profile == null ? (
+          <div className="loader"></div>
+        ) : (
+          <>
+            <div className="w-[40%]">
+              <PostPage post={post} profile={profile} />
+            </div>
+            <div className="w-[40%]">
+              <Comments post={post} profile={profile} />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
