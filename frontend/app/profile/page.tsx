@@ -58,7 +58,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex justify-start space-x-16 pt-4">
                   <p className="text-md font-semibold">
-                    {profilePosts.length} post
+                    {profilePosts != null ? profilePosts.length : 0} posts
                   </p>
                   <p className="text-md font-semibold">{followers} followers</p>
                   <p className="text-md font-semibold">{following} following</p>

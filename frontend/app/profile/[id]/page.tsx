@@ -172,7 +172,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
                   </div>
                   <div className="flex justify-start space-x-16 pt-4">
                     <p className="text-md font-semibold">
-                      {profilePosts.length} post
+                      {profilePosts != null ? profilePosts.length : 0} posts
                     </p>
                     <p className="text-md font-semibold">
                       {profile.followers} followers
