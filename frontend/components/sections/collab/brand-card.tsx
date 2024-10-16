@@ -74,7 +74,9 @@ export default function BrandCard({ idx, brand }: { idx: number; brand: any }) {
           </div>
           <div className="p-2">
             <p className="font-semibold text-lg">{profile.name}</p>
-            <p className="text-md text-muted-foreground">{brand.description}</p>
+            <p className="text-md text-muted-foreground">
+              {brand.brandDescription}
+            </p>
 
             <div className="flex justify-center space-x-4  px-4 pt-2">
               <div className="flex items-center space-x-2">

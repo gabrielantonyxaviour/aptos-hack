@@ -39,9 +39,7 @@ export default function NewUser() {
   const { updateProfile } = useEnvironmentStore((store) => store);
 
   const [nullifierHash, setNullifierHash] = useState("");
-  useEffect(() => {
-    console.log(process.env.NEXT_PUBLIC_WORLDCOIN_APP_ID);
-  }, []);
+
   return (
     <div className="mx-auto flex w-full flex-col justify-center space-y-6 ">
       <div className="flex justify-between items-center">

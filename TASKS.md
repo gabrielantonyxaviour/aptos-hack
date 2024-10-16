@@ -28,3 +28,10 @@
 2. Double click like
 3. Like animation
 4. Change Dummy images to actual images
+
+## FINAL
+
+1. Fetch posts
+2. Fetch posts by user
+3. Fetch posts + comment
+4. Fetch applications

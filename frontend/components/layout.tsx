@@ -33,12 +33,32 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           const response = await res.json();
           const { resources } = response.data;
 
+          const aptosCoin = (resources as any[]).find(
+            (r) => r.type === `0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>`
+          );
+
+          const aptosValue = aptosCoin.data.coin.value;
+
           // FETCH PROFILE
           const profile = (resources as any[]).find(
             (r) => r.type === `${CORE_MODULE}::SocialMediaPlatform::Profile`
           );
           if (profile != undefined) {
             console.log("Profile found");
+            console.log({
+              username: hexToString(profile.data.user_name.slice(2)),
+              name: hexToString(profile.data.display_name.slice(2)),
+              bio: hexToString(profile.data.bio.slice(2)),
+              image: hexToString(profile.data.profile_pic_cid.slice(2)),
+              following: 0,
+              followers: 0,
+              niches: hexToNumberArray(profile.data.niche.slice(2)),
+              preferences: hexToNumberArray(profile.data.preferences.slice(2)),
+              humanness_nullifier: hexToString(
+                profile.data.worldcoin_nullifier_hash.slice(2)
+              ),
+              balance: aptosValue,
+            });
             setHasProfile(1);
             updateProfile({
               username: hexToString(profile.data.user_name.slice(2)),
@@ -52,7 +72,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               humanness_nullifier: hexToString(
                 profile.data.worldcoin_nullifier_hash.slice(2)
               ),
-              balance: "0",
+              balance: aptosValue,
             });
             if (pathName === "/") {
               router.push("/home");
