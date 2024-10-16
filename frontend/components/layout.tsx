@@ -135,10 +135,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               posts.data.map((post: any, idx: number) => {
                 return {
                   id: idx,
-                  caption: post.value[0].caption,
+                  caption: hexToString(post.value[0].caption.slice(2)),
                   comments: post.value[0].comments,
-                  image: post.value[0].content_hash,
-                  status: post.value[0].status,
+                  image: hexToString(post.value[0].content_hash.slice(2)),
+                  status: hexToString(post.value[0].status.slice(2)),
                   isPromotional: post.value[0].is_promotional,
                   likes: 0,
                   promotedProfile: post.is_promotional
@@ -151,22 +151,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               applications.data.map((app: any, idx: number) => {
                 return {
                   id: idx,
-                  description: app.value[0].description,
-                  minRewards: app.value[0].min_rewards,
-                  maxRewards: app.value[0].max_rewards,
-                  minBerries: app.value[0].min_berries_required,
+                  applicant: app.key,
                 };
               })
             );
             setBrands(
-              brand_profiles.data.map((brand: any) => {
+              brand_profiles.data.map((brand: any, idx: number) => {
                 return {
-                  id: brand.value[0].id,
-                  owner: brand.value[0].key,
-                  brandDescription: brand.value[0].collab_description,
-                  minBerries: brand.value[0].min_berries_required,
-                  minRewards: brand.value[0].min_rewards,
-                  maxRewards: brand.value[0].max_rewards,
+                  id: idx,
+                  owner: brand.key,
+                  brandDescription: hexToString(
+                    brand.value.collab_description.slice(2)
+                  ),
+                  minBerries: brand.value.min_berries_required,
+                  minRewards: brand.value.min_rewards,
+                  maxRewards: brand.value.max_rewards,
                 };
               })
             );

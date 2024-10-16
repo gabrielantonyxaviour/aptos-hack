@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
 import {
   availableCatgegories,
@@ -14,7 +15,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 
 export default function BrandCard({ idx, brand }: { idx: number; brand: any }) {
-  const [profile, setProfile] = useState<any>();
+  const [profile, setProfile] = useState<any>(null);
   const { account, signAndSubmitTransaction } = useWallet();
 
   useEffect(() => {
@@ -46,12 +47,20 @@ export default function BrandCard({ idx, brand }: { idx: number; brand: any }) {
   }, []);
 
   const berries = 20000; // TODO : Remove hardcoding
-  return (
+  return profile == null ? (
+    <div className="flex flex-col space-y-3">
+      <Skeleton className="h-[125px] w-[250px] rounded-xl" />
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-[250px]" />
+        <Skeleton className="h-4 w-[200px]" />
+      </div>
+    </div>
+  ) : (
     <Card key={idx}>
       <CardContent className="p-0 ">
         <div className="flex flex-col justify-center ">
           <Image
-            src={brand.image}
+            src={`https://aggregator-devnet.walrus.space/v1/${profile.image}`}
             width={300}
             height={300}
             alt="Collab"
@@ -95,9 +104,9 @@ export default function BrandCard({ idx, brand }: { idx: number; brand: any }) {
               </div>
             </div>
             <Separator className="my-2" />
-            <div className="flex space-x-2 py-1">
+            <div className="flex flex-wrap space-x-2 py-1">
               {profile.niche.map((n: any, idx: number) => (
-                <Badge key={idx} className="text-sm">
+                <Badge key={idx} className="text-xs my-1">
                   {availableCatgegories[n]}
                 </Badge>
               ))}
