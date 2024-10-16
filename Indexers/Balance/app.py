@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Query
 import requests
+import os
+import uvicorn
 
 app = FastAPI()
 
@@ -78,3 +80,8 @@ async def get_coin_balances(address: str = Query(..., description="Account addre
 
     except Exception as e:
         return {"error": str(e)}
+
+# Entry point to run the app using Uvicorn
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
