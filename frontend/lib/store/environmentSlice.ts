@@ -1,26 +1,8 @@
 import { StateCreator } from "zustand";
-interface Post {
-  id: number;
-  caption: string;
-  comments: any[];
-  image: string;
-  creator: string;
-  status: string;
-  isPromotional: boolean;
-  likes: string;
-  promotedProfile: any;
-}
+import { Brand, Post } from "../type";
 
 interface Application {}
 
-interface Brand {
-  id: number;
-  owner: string;
-  description: string;
-  maxRewards: string;
-  minRewards: string;
-  minBerries: string;
-}
 interface EnvironmentState {
   hasProfile: number;
   hasPosts: number;

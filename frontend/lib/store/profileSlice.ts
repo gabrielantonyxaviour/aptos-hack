@@ -12,7 +12,6 @@ interface ProfileState {
   balance: string;
   humanness_nullifier: string;
 }
-
 interface ProfileActions {
   updateProfile: (profile: ProfileState) => void;
 }

@@ -87,7 +87,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             (r) => r.type === `${CORE_MODULE}::SocialMediaPlatform::UserPosts`
           );
           if (posts != undefined && posts.length > 0) {
-            console.log(posts);
             console.log("Posts found");
             const allPosts = posts[0].data.posts;
             const formattedPosts = [];
@@ -106,6 +105,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   : "0x",
               });
             }
+            console.log({ posts: formattedPosts });
             updatePosts({ posts: formattedPosts });
             setHasPosts(1);
           } else {
@@ -147,10 +147,24 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           );
           if (comprehensiveData != undefined) {
             console.log("Environment Data found");
-            console.log(comprehensiveData);
             const { posts, applications, brand_profiles } =
               comprehensiveData.data;
-
+            console.log(
+              posts.data.map((post: any, idx: number) => {
+                return {
+                  id: idx,
+                  caption: hexToString(post.value[0].caption.slice(2)),
+                  comments: post.value[0].comments,
+                  image: hexToString(post.value[0].content_hash.slice(2)),
+                  status: hexToString(post.value[0].status.slice(2)),
+                  isPromotional: post.value[0].is_promotional,
+                  likes: 0,
+                  promotedProfile: post.is_promotional
+                    ? post.promoted_profile
+                    : "0x",
+                };
+              })
+            );
             setPosts(
               posts.data.map((post: any, idx: number) => {
                 return {

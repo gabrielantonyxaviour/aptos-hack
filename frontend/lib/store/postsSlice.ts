@@ -1,15 +1,6 @@
 import { StateCreator } from "zustand";
-interface Post {
-  id: number;
-  caption: string;
-  comments: any[];
-  image: string;
-  creator: string;
-  status: string;
-  isPromotional: boolean;
-  likes: string;
-  promotedProfile: any;
-}
+import { Post } from "../type";
+
 interface PostsState {
   posts: Post[];
 }

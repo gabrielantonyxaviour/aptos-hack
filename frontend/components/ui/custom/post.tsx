@@ -23,21 +23,64 @@ import { BarChart, Heart, MessageCircle, UserMinusIcon } from "lucide-react";
 import { Input } from "../input";
 import { useRouter } from "next/navigation";
 import { useEnvironmentStore } from "@/components/context";
-export default function Post() {
+import { Post as PostType } from "@/lib/type";
+import { useEffect, useState } from "react";
+import { CORE_MODULE } from "@/lib/aptos";
+import { hexToNumberArray, hexToString } from "@/lib/utils";
+import { Skeleton } from "../skeleton";
+
+export default function Post({ key, post }: { key: number; post: PostType }) {
+  const { id, caption, image, creator, status, likes, comments } = post;
   const router = useRouter();
-  const { username, image } = useEnvironmentStore((store) => store);
-  return (
-    <Card className="mb-4 mr-4">
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    console.log("Post");
+    console.log(post);
+
+    (async function () {
+      try {
+        const res = await fetch(`/api/user?AccountAddress=${post.creator}`);
+        const response = await res.json();
+        const { resources } = response.data;
+
+        // FETCH PROFILE
+        const profile = (resources as any[]).find(
+          (r) => r.type === `${CORE_MODULE}::SocialMediaPlatform::Profile`
+        );
+        if (profile != undefined) {
+          setProfile({
+            image: hexToString(profile.data.profile_pic_cid.slice(2)),
+            username: hexToString(profile.data.user_name.slice(2)),
+            name: hexToString(profile.data.display_name.slice(2)),
+          });
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    })();
+  }, []);
+
+  return profile == null ? (
+    <div className="flex flex-col space-y-3" key={key}>
+      <Skeleton className="h-[425px] w-[250px] rounded-xl" />
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-[250px]" />
+        <Skeleton className="h-4 w-[200px]" />
+      </div>
+    </div>
+  ) : (
+    <Card className="mb-4 mr-4" key={key}>
       <CardHeader className="p-3 m-0">
         <div className="flex justify-between">
           <div
             className="flex items-center space-x-4 cursor-pointer"
             onClick={() => {
-              // TODO: Go to profile page
+              router.push(`/profile/${creator}`);
             }}
           >
             <Image
-              src={`https://aggregator-devnet.walrus.space/v1/${image}`}
+              src={`https://aggregator-devnet.walrus.space/v1/${profile.image}`}
               width={30}
               height={30}
               alt="Avatar"
@@ -45,9 +88,9 @@ export default function Post() {
             />
             <div className="flex flex-col">
               <p className="font-semibold hover:scale-105 hover:-translate-y-[1px] transition duration-150 ease-in-out">
-                {username}
+                {profile.username}
               </p>
-              <p className="text-xs text-muted-foreground">📍Singapore</p>
+              <p className="text-xs text-muted-foreground">{status}</p>
             </div>
           </div>
           <DropdownMenu>
@@ -71,20 +114,25 @@ export default function Post() {
         className="pb-0 px-0 m-0 cursor-pointer"
         onClick={() => {
           // TODO: Go to post page
-          router.push("/post/1");
+          router.push(`/post/${id}`);
         }}
       >
         <div className="flex justify-center bg-card">
-          <Image src={"/post/hi.jpg"} width={500} height={500} alt="Post" />
+          <Image
+            src={`https://aggregator-devnet.walrus.space/v1/${image}`}
+            width={500}
+            height={500}
+            alt="Post"
+          />
         </div>
         <div className="flex space-x-4 p-3 text-muted-foreground">
           <div className="flex space-x-1 items-center">
             <Heart className="h-5 w-5 fill-red-500 text-red-500" />
-            <p className="text-sm">100</p>
+            <p className="text-sm">{likes.toString()}</p>
           </div>
           <div className="flex space-x-1 items-center">
             <MessageCircle className="h-5 w-5" />
-            <p className="text-sm">100</p>
+            <p className="text-sm">{comments.length}</p>
           </div>
           <TooltipProvider>
             <Tooltip delayDuration={50}>
@@ -101,15 +149,15 @@ export default function Post() {
           </TooltipProvider>
         </div>
         <p className="font-semibold px-3">
-          {username} &nbsp;
-          <span className="text-sm font-medium">too cool for this app</span>
+          {profile.username} &nbsp;
+          <span className="text-sm font-medium">{caption}</span>
         </p>
         <p className="px-4 pt-1 text-muted-foreground text-sm">
-          View all 24 comments
+          View all {comments.length} comments
         </p>
         <div className="flex px-3 items-center">
           <Image
-            src={`https://aggregator-devnet.walrus.space/v1/${image}`}
+            src={`https://aggregator-devnet.walrus.space/v1/${profile.image}`}
             width={30}
             height={30}
             alt="Avatar"
