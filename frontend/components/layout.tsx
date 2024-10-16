@@ -45,20 +45,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           );
           if (profile != undefined) {
             console.log("Profile found");
-            console.log({
-              username: hexToString(profile.data.user_name.slice(2)),
-              name: hexToString(profile.data.display_name.slice(2)),
-              bio: hexToString(profile.data.bio.slice(2)),
-              image: hexToString(profile.data.profile_pic_cid.slice(2)),
-              following: 0,
-              followers: 0,
-              niches: hexToNumberArray(profile.data.niche.slice(2)),
-              preferences: hexToNumberArray(profile.data.preferences.slice(2)),
-              humanness_nullifier: hexToString(
-                profile.data.worldcoin_nullifier_hash.slice(2)
-              ),
-              balance: aptosValue,
-            });
+
             setHasProfile(1);
             updateProfile({
               username: hexToString(profile.data.user_name.slice(2)),
@@ -110,7 +97,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   : "0x",
               });
             }
-            console.log({ posts: formattedPosts });
             updatePosts({ posts: formattedPosts });
             setHasPosts(1);
           } else {
@@ -151,9 +137,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               `${CORE_MODULE}::SocialMediaPlatform::ComprehensiveData`
           );
           if (comprehensiveData != undefined) {
-            console.log("Environment Data found");
             const { posts, applications, brand_profiles } =
               comprehensiveData.data;
+            console.log("POSTS INPUT");
             console.log(
               posts.data.map((post: any, idx: number) => {
                 return {
@@ -165,6 +151,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       content: hexToString(c.content.slice(2)),
                     };
                   }),
+                  creator: post.key,
                   image: hexToString(post.value[0].content_hash.slice(2)),
                   status: hexToString(post.value[0].status.slice(2)),
                   isPromotional: post.value[0].is_promotional,
@@ -186,7 +173,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       content: hexToString(c.content.slice(2)),
                     };
                   }),
-                  creator: post.value[0].creator,
+                  creator: post.key,
                   image: hexToString(post.value[0].content_hash.slice(2)),
                   status: hexToString(post.value[0].status.slice(2)),
                   isPromotional: post.value[0].is_promotional,

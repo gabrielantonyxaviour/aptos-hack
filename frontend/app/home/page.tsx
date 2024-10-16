@@ -7,9 +7,14 @@ import Suggested from "@/components/ui/custom/suggested";
 import { ScrollBar, ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useEffect } from "react";
 
 export default function HomePage() {
   const { posts } = useEnvironmentStore((store) => store);
+  useEffect(() => {
+    console.log("POSTS OUTPUT");
+    console.log(posts);
+  }, [posts]);
   return (
     <div className="flex h-screen">
       <SideBar />
