@@ -94,7 +94,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               formattedPosts.push({
                 id: i,
                 caption: hexToString(allPosts[i].caption.slice(2)),
-                comments: allPosts[i].comments,
+                comments: allPosts[i].comments.map((c: any) => {
+                  return {
+                    commenter: c.commenter,
+                    content: hexToString(c.content.slice(2)),
+                  };
+                }),
                 image: hexToString(allPosts[i].content_hash.slice(2)),
                 creator: allPosts[i].creator,
                 status: hexToString(allPosts[i].status.slice(2)),
@@ -154,7 +159,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 return {
                   id: idx,
                   caption: hexToString(post.value[0].caption.slice(2)),
-                  comments: post.value[0].comments,
+                  comments: post.value[0].comments.map((c: any) => {
+                    return {
+                      commenter: c.commenter,
+                      content: hexToString(c.content.slice(2)),
+                    };
+                  }),
                   image: hexToString(post.value[0].content_hash.slice(2)),
                   status: hexToString(post.value[0].status.slice(2)),
                   isPromotional: post.value[0].is_promotional,
@@ -170,7 +180,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 return {
                   id: idx,
                   caption: hexToString(post.value[0].caption.slice(2)),
-                  comments: post.value[0].comments,
+                  comments: post.value[0].comments.map((c: any) => {
+                    return {
+                      commenter: c.commenter,
+                      content: hexToString(c.content.slice(2)),
+                    };
+                  }),
                   image: hexToString(post.value[0].content_hash.slice(2)),
                   status: hexToString(post.value[0].status.slice(2)),
                   isPromotional: post.value[0].is_promotional,

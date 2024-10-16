@@ -21,39 +21,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { hexToString } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
-export default function PostPage({ postId }: { postId: number }) {
+export default function PostPage({
+  post,
+  profile,
+}: {
+  post: any;
+  profile: any;
+}) {
   const isLiked = false; // TODO: Remove hardcoding
   const { account, signAndSubmitTransaction } = useWallet();
-  const { posts } = useEnvironmentStore((store) => store);
-  const [post, setPost] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
   const router = useRouter();
-  useEffect(() => {
-    console.log("PostPage");
-    setPost(posts.find((p) => p.id == postId));
-    if (post != null)
-      (async function () {
-        try {
-          const res = await fetch(`/api/user?AccountAddress=${post.creator}`);
-          const response = await res.json();
-          const { resources } = response.data;
-
-          // FETCH PROFILE
-          const profile = (resources as any[]).find(
-            (r) => r.type === `${CORE_MODULE}::SocialMediaPlatform::Profile`
-          );
-          if (profile != undefined) {
-            setProfile({
-              image: hexToString(profile.data.profile_pic_cid.slice(2)),
-              username: hexToString(profile.data.user_name.slice(2)),
-              name: hexToString(profile.data.display_name.slice(2)),
-            });
-          }
-        } catch (e) {
-          console.log(e);
-        }
-      })();
-  }, [post]);
 
   return post == null || profile == null ? (
     <div className="flex flex-col space-y-3">
@@ -132,7 +109,7 @@ export default function PostPage({ postId }: { postId: number }) {
                       function: `${CORE_MODULE}::SocialMediaPlatform::like_post`,
                       functionArguments: [
                         "0x2df1944b5fcffc2a53d2c75d4a86be38c1ab7cb32bba9db38f7141385786969a", // TODO: remove hardcooing
-                        postId,
+                        post.id,
                       ],
                       typeArguments: [],
                     },
@@ -163,7 +140,7 @@ export default function PostPage({ postId }: { postId: number }) {
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Coming Soon</p>
+                <p>ing Soon</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
