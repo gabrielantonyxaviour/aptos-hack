@@ -48,7 +48,7 @@ export default function BrandCard({ idx, brand }: { idx: number; brand: any }) {
 
   const berries = 20000; // TODO : Remove hardcoding
   return profile == null ? (
-    <div className="flex flex-col space-y-3">
+    <div key={idx} className="flex flex-col space-y-3">
       <Skeleton className="h-[125px] w-[250px] rounded-xl" />
       <div className="space-y-2">
         <Skeleton className="h-4 w-[250px]" />
