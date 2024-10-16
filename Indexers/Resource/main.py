@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Query
 import requests
+import os
+import uvicorn
 
 app = FastAPI()
 
@@ -19,17 +21,20 @@ def get_user_posts(account_address: str = Query(..., alias="AccountAddress")):
     if response.status_code == 200:
         response_data = response.json()
 
-        # Instead of filtering for specific "UserPosts", return all resources
+        # Return all resources
         all_resources = []
         
         for resource in response_data:
-            # Append each resource to the list
             all_resources.append({
                 "type": resource["type"],
                 "data": resource["data"]
             })
 
-        # Return the entire resources list
         return {"resources": all_resources}
     else:
         return {"error": "Failed to fetch data from Aptos API"}
+
+# Entry point to run the app using Uvicorn
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
