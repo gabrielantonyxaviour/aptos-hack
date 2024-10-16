@@ -32,7 +32,7 @@ We leverage **Linear Regression** to calculate the quality and impact of the con
    - The platform is built on the **Aptos Blockchain**, which ensures decentralized data storage, transparency, and trust in every interaction.
 
 - **Aptos Indexer**:
-   - We utilize the **Aptos Indexer** to index all on-chain data, including engagement metrics (likes, comments, follows, etc.) to display on the frontend and to feed **Galadriel AI** for accurate social credit calculation.
+   - We utilize the **Aptos Indexer** to index all on-chain data, including engagement metrics (likes, comments, follows, etc.) to display on the frontend and to feed **AI** for accurate social credit calculation.
 
 - **AI Integration**:
    - **AI implementing Linear Regression** calculates the social credit score for each influencer by analyzing both on-chain engagement data and the quality of the influencer's audience.
