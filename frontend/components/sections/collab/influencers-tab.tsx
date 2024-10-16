@@ -1,3 +1,4 @@
+import { useEnvironmentStore } from "@/components/context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,6 +7,8 @@ import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
 import { formattedNumber } from "@/lib/utils";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import Image from "next/image";
+import { useEffect } from "react";
+import BrandCard from "./brand-card";
 
 export default function InfluencersTab() {
   const { account, signAndSubmitTransaction } = useWallet();
@@ -67,101 +70,12 @@ export default function InfluencersTab() {
       maximumPay: 4000,
     },
   ];
+  const { brands } = useEnvironmentStore((store) => store);
+
   return (
     <div className="grid grid-cols-4 gap-2 w-full py-4 pr-4">
-      {collabs.map((collab, idx) => (
-        <Card key={idx}>
-          <CardContent className="p-0 ">
-            <div className="flex flex-col justify-center ">
-              <Image
-                src={collab.image}
-                width={300}
-                height={300}
-                alt="Collab"
-                className="rounded-t-lg"
-              />
-              <div className="w-full rounded-b-lg p-2 flex justify-center space-x-2 bg-secondary">
-                <Image src={"/logo.png"} width={20} height={20} alt="Logo" />
-                <p className="text-center">
-                  {"Min.  " + formattedNumber(collab.requiredBerries)}
-                </p>
-              </div>
-              <div className="p-2">
-                <p className="font-semibold text-lg">{collab.name}</p>
-                <p className="text-md text-muted-foreground">
-                  {collab.description}
-                </p>
-
-                <div className="flex justify-center space-x-4  px-4 pt-2">
-                  <div className="flex items-center space-x-2">
-                    <Image
-                      src={"/aptos.png"}
-                      width={20}
-                      height={20}
-                      alt="aptos"
-                      className="rounded-full"
-                    />
-                    <p className="text-md font-semibold">
-                      {formattedNumber(collab.minimumPay)}
-                    </p>
-                  </div>
-                  <div className="">-</div>
-                  <div className="flex items-center space-x-2">
-                    <Image
-                      src={"/aptos.png"}
-                      width={20}
-                      height={20}
-                      alt="aptos"
-                      className="rounded-full"
-                    />
-                    <p className="text-md font-semibold">
-                      {formattedNumber(collab.maximumPay)}
-                    </p>
-                  </div>
-                </div>
-                <Separator className="my-2" />
-                <div className="flex space-x-2 py-1">
-                  {collab.niche.map((n, idx) => (
-                    <Badge key={idx} className="text-sm">
-                      {n}
-                    </Badge>
-                  ))}
-                </div>
-                <Separator className="my-2" />
-                <Button
-                  variant={"secondary"}
-                  className="w-full font-semibold"
-                  disabled={berries < collab.requiredBerries}
-                  onClick={async () => {
-                    if (account == undefined) return;
-
-                    const aptos = getAptosClient();
-                    const applyCollabTx = await signAndSubmitTransaction({
-                      sender: account.address,
-                      data: {
-                        function: `${CORE_MODULE}::SocialMediaPlatform::apply_collab`,
-                        functionArguments: [
-                          "0x0000000000000000000000000000000000000000000000000000000000000000", // TODO: Need to remove hardcoding
-                        ],
-                        typeArguments: [],
-                      },
-                    });
-                    console.log(applyCollabTx);
-                    const executedTransaction = await aptos.waitForTransaction({
-                      transactionHash: applyCollabTx.hash,
-                    });
-
-                    console.log(executedTransaction);
-                  }}
-                >
-                  {collab.requiredBerries > berries
-                    ? "Insufficient Berries"
-                    : "Apply"}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {brands.map((brand, idx) => (
+        <BrandCard brand={brand} idx={idx} />
       ))}
     </div>
   );

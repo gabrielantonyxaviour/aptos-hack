@@ -11,15 +11,16 @@ interface Post {
   promotedProfile: any;
 }
 
-interface Application {
+interface Application {}
+
+interface Brand {
   id: number;
+  owner: string;
   description: string;
   maxRewards: string;
   minRewards: string;
   minBerries: string;
 }
-
-interface Brand {}
 interface EnvironmentState {
   hasProfile: number;
   hasPosts: number;

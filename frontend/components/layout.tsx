@@ -159,13 +159,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               })
             );
             setBrands(
-              brand_profiles.data[0].value.map((brand: any) => {
+              brand_profiles.data.map((brand: any) => {
                 return {
-                  id: brand.id,
-                  brandDescription: brand.collab_description,
-                  minBerries: brand.min_berries_required,
-                  minRewards: brand.min_rewards,
-                  maxRewards: brand.max_rewards,
+                  id: brand.value[0].id,
+                  owner: brand.value[0].key,
+                  brandDescription: brand.value[0].collab_description,
+                  minBerries: brand.value[0].min_berries_required,
+                  minRewards: brand.value[0].min_rewards,
+                  maxRewards: brand.value[0].max_rewards,
                 };
               })
             );
