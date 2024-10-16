@@ -5,44 +5,7 @@ import Notification from "@/components/sections/notifications/notification";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 export default function NotificationsPage() {
-  const notifications = [
-    {
-      id: 1,
-      type: 1,
-      user: {
-        name: "Marshal",
-        username: "marshal.aptos",
-      },
-      ref: {
-        image: "/post/hi.jpg",
-        url: "/post/1",
-      },
-    },
-    {
-      id: 2,
-      type: 2,
-      user: {
-        name: "Marshal",
-        username: "marshal.aptos",
-      },
-      ref: {
-        image: "/post/hi.jpg",
-        url: "/post/1",
-      },
-    },
-    {
-      id: 2,
-      type: 2,
-      user: {
-        name: "Tabitha",
-        username: "tabitha.aptos",
-      },
-      ref: {
-        image: "/post/hi.jpg",
-        url: "/post/1",
-      },
-    },
-  ];
+  const notifications: any[] = [];
   return (
     <div className="flex h-screen ">
       <SideBar />
@@ -54,15 +17,21 @@ export default function NotificationsPage() {
           </div>
           <Separator className="my-4" />
           <ScrollArea className="h-[90vh] mt-4 w-full">
-            {notifications.map((not, idx) => (
-              <Notification
-                key={idx}
-                type={not.type}
-                user={not.user.name}
-                image={not.ref.image}
-                url={not.ref.url}
-              />
-            ))}
+            {notifications.length == 0 ? (
+              <p className="text-center text-muted-foreground">
+                No notifications yet.
+              </p>
+            ) : (
+              notifications.map((not, idx) => (
+                <Notification
+                  key={idx}
+                  type={not.type}
+                  user={not.user.name}
+                  image={not.ref.image}
+                  url={not.ref.url}
+                />
+              ))
+            )}
             <ScrollBar orientation="vertical" className="ml-4 border-r-card" />
           </ScrollArea>
         </div>

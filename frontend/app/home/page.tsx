@@ -19,7 +19,7 @@ export default function HomePage() {
     <div className="flex h-screen">
       <SideBar />
       <div className="pt-7 px-7 flex-1 flex justify-center space-x-12">
-        <div className="max-w-[1000px]">
+        <div className={posts.length == 0 ? "w-[600px]" : "max-w-[1000px]"}>
           <Tabs defaultValue="suggested">
             <div className=" flex justify-between w-full">
               <p className="font-semibold text-lg">Your Feed</p>

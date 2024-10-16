@@ -15,10 +15,7 @@ import {
 import { BarChart, Heart, MessageCircle, UserMinusIcon } from "lucide-react";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
-import { useEnvironmentStore } from "@/components/context";
-import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { hexToString } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
 export default function PostPage({
@@ -140,13 +137,13 @@ export default function PostPage({
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>ing Soon</p>
+                <p>Coming Soon</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
         <p className="font-semibold px-3">
-          {post.username} &nbsp;
+          {profile.username} &nbsp;
           <span className="text-sm font-medium">{post.caption}</span>
         </p>
       </CardContent>

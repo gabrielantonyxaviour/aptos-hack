@@ -85,6 +85,7 @@ export default function Comments({
                 transactionHash: createCommentTx.hash,
               });
               console.log(executedTransaction);
+              setComment("");
             }}
           >
             <p className="font-semibold">Send</p>{" "}
