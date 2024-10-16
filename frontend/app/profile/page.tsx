@@ -26,11 +26,16 @@ export default function ProfilePage() {
   } = useEnvironmentStore((store) => store);
   const { account } = useWallet();
   const [profilePosts, setProfilePosts] = useState<any>(null);
+  const [berriesHovering, setBerriesHovering] = useState(false);
 
   useEffect(() => {
     if (account == undefined) return;
     console.log("ProfilePage");
-    setProfilePosts(posts.filter((p) => p.creator == account.address));
+    console.log(account.address);
+    console.log(posts);
+    setProfilePosts(
+      posts.filter((p) => account.address.slice(2).includes(p.creator.slice(2)))
+    );
   }, [account]);
   return (
     <div className="flex h-screen select-none">
@@ -52,7 +57,9 @@ export default function ProfilePage() {
                   <WalletInfo />
                 </div>
                 <div className="flex justify-start space-x-16 pt-4">
-                  <p className="text-md font-semibold">1 post</p>
+                  <p className="text-md font-semibold">
+                    {profilePosts != null ? profilePosts.length : 0} posts
+                  </p>
                   <p className="text-md font-semibold">{followers} followers</p>
                   <p className="text-md font-semibold">{following} following</p>
                 </div>
@@ -101,8 +108,24 @@ export default function ProfilePage() {
                       className="rounded-full"
                     />
                   </div>
-                  <p className="font-semibold bg-primary w-full text-center text-card rounded-b-md p-1 text-md">
-                    Berries
+                  <p
+                    className="font-semibold bg-primary w-full text-center text-card rounded-b-md p-1 text-md hover:bg-white cursor-pointer transition duration-150 ease-in-out"
+                    onMouseLeave={() => setBerriesHovering(false)}
+                    onMouseEnter={() => setBerriesHovering(true)}
+                    onClick={async () => {
+                      try {
+                        console.log(account?.address);
+                        const res = await fetch(
+                          `/api/calculate-berries?account_address=${account?.address}&owner_address=${account?.address}`
+                        );
+                        const response = await res.json();
+                        console.log(response);
+                      } catch (e) {
+                        console.log(e);
+                      }
+                    }}
+                  >
+                    {berriesHovering ? "Update" : "Berries"}
                   </p>
                 </CardContent>
               </Card>
@@ -110,7 +133,7 @@ export default function ProfilePage() {
                 <CardContent className="p-0 m-0 flex flex-col justify-between items-center h-full">
                   <div></div>
                   <div className="flex items-center space-x-4 py-3">
-                    <p className="font-semibold text-lg">12</p>
+                    <p className="font-semibold text-lg">0</p>
                     <Image
                       src="/dragon.jpg"
                       width={30}
@@ -128,7 +151,7 @@ export default function ProfilePage() {
                 <CardContent className="p-0 m-0 flex flex-col justify-between items-center h-full">
                   <div></div>
                   <div className="flex items-center space-x-4 py-3">
-                    <p className="font-semibold text-lg">3</p>
+                    <p className="font-semibold text-lg">0</p>
                     <Image
                       src="/collab.png"
                       width={30}
