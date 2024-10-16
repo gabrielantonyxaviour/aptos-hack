@@ -23,9 +23,7 @@ export default function Profile({ username }: { username: string }) {
   const [isFollowing, setIsFollowing] = useState(false);
   const { account, signAndSubmitTransaction } = useWallet();
   const [hoveringUnfollow, setHoveringUnfollow] = useState<boolean>(false);
-  useEffect(() => {
-    // TODO: Call and get the profile data and store it locally here
-  }, [username]);
+  useEffect(() => {}, []);
 
   return (
     <div className="flex h-screen select-none">
@@ -210,8 +208,7 @@ export default function Profile({ username }: { username: string }) {
               </Card>
             </div>
             <p className="text-center py-4 font-semibold text-lg">Posts</p>
-            <Post />
-            <Post />
+            {}
             <ScrollBar className="ml-12" />
           </ScrollArea>
         </div>

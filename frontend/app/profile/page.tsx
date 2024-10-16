@@ -7,21 +7,34 @@ import { Card, CardContent } from "@/components/ui/card";
 import Post from "@/components/ui/custom/post";
 import WalletInfo from "@/components/ui/custom/wallet-info";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CORE_MODULE, getAptosClient } from "@/lib/aptos";
 import { availableCatgegories } from "@/lib/utils";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { Check, Plus, X } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function ProfilePage() {
-  const isYourProfile = false;
-  const isFollowing = false;
-  const { account, signAndSubmitTransaction } = useWallet();
-  const [hoveringUnfollow, setHoveringUnfollow] = useState<boolean>(false);
-  const { username, image, name, followers, following, bio, niches } =
-    useEnvironmentStore((store) => store);
+  const {
+    username,
+    image,
+    name,
+    followers,
+    following,
+    bio,
+    niches,
+    posts,
+    balance,
+  } = useEnvironmentStore((store) => store);
+  const { account } = useWallet();
+  const [profilePosts, setProfilePosts] = useState<any>(null);
 
+  useEffect(() => {
+    if (account == undefined) return;
+    console.log("ProfilePage");
+    setProfilePosts(posts.filter((p) => p.creator == account.address));
+  }, [account]);
   return (
     <div className="flex h-screen select-none">
       <SideBar />
@@ -62,7 +75,9 @@ export default function ProfilePage() {
                 <CardContent className="p-0 m-0 flex flex-col justify-between items-center h-full">
                   <div></div>
                   <div className="flex items-center space-x-4  py-3">
-                    <p className="font-semibold text-lg">1.45</p>
+                    <p className="font-semibold text-lg">
+                      {(parseInt(balance) / 10 ** 8).toFixed(3).toString()}
+                    </p>
                     <Image
                       src="/aptos.png"
                       width={30}
@@ -132,8 +147,19 @@ export default function ProfilePage() {
               </Card>
             </div>
             <p className="text-center py-4 font-semibold text-lg">Posts</p>
-            <Post />
-            <Post />
+            {profilePosts != null ? (
+              profilePosts.map((p: any, idx: number) => (
+                <Post key={idx} post={p} />
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center space-y-3">
+                <Skeleton className="h-[625px] w-[450px] rounded-xl" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-[250px]" />
+                  <Skeleton className="h-4 w-[200px]" />
+                </div>
+              </div>
+            )}
             <ScrollBar className="ml-12" />
           </ScrollArea>
         </div>

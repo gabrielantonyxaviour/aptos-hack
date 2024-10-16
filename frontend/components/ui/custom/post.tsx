@@ -22,18 +22,17 @@ import {
 import { BarChart, Heart, MessageCircle, UserMinusIcon } from "lucide-react";
 import { Input } from "../input";
 import { useRouter } from "next/navigation";
-import { useEnvironmentStore } from "@/components/context";
 import { Post as PostType } from "@/lib/type";
 import { useEffect, useState } from "react";
 import { CORE_MODULE } from "@/lib/aptos";
-import { hexToNumberArray, hexToString } from "@/lib/utils";
+import { hexToString } from "@/lib/utils";
 import { Skeleton } from "../skeleton";
 
 export default function Post({ key, post }: { key: number; post: PostType }) {
   const { id, caption, image, creator, status, likes, comments } = post;
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
-
+  const isLiked = false;
   useEffect(() => {
     console.log("Post");
     console.log(post);
@@ -63,7 +62,7 @@ export default function Post({ key, post }: { key: number; post: PostType }) {
 
   return profile == null ? (
     <div className="flex flex-col space-y-3" key={key}>
-      <Skeleton className="h-[425px] w-[250px] rounded-xl" />
+      <Skeleton className="h-[625px] w-[450px] rounded-xl" />
       <div className="space-y-2">
         <Skeleton className="h-4 w-[250px]" />
         <Skeleton className="h-4 w-[200px]" />
@@ -127,8 +126,16 @@ export default function Post({ key, post }: { key: number; post: PostType }) {
         </div>
         <div className="flex space-x-4 p-3 text-muted-foreground">
           <div className="flex space-x-1 items-center">
-            <Heart className="h-5 w-5 fill-red-500 text-red-500" />
-            <p className="text-sm">{likes.toString()}</p>
+            <Heart
+              className={`h-5 w-5 ${
+                isLiked
+                  ? "fill-red-500 text-red-500"
+                  : "hover:fill-red-300 hover:text-red-300 transition duration-50 ease-in-out hover:scale-110"
+              }  cursor-pointer`}
+            />
+            <p className="text-sm">
+              {(likes == undefined ? 0 : likes).toString()}
+            </p>
           </div>
           <div className="flex space-x-1 items-center">
             <MessageCircle className="h-5 w-5" />

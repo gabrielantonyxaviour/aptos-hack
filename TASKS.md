@@ -31,9 +31,8 @@
 
 ## FINAL
 
-1. Fetch posts
-2. Fetch posts by user
 3. Fetch posts + comment
 4. Fetch applications
 5. Test All contract calls
 6. Migrate to new contracts and feed correct values
+7. Fetch berries and display
